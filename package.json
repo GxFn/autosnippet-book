@@ -1,0 +1,25 @@
+{
+  "name": "autosnippet-book",
+  "version": "1.0.0",
+  "description": "AutoSnippet 技术解构 — 从架构到实现的深度文档",
+  "type": "module",
+  "scripts": {
+    "dev": "vitepress dev docs",
+    "build": "vitepress build docs",
+    "preview": "vitepress preview docs"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/GxFn/autosnippet-book.git"
+  },
+  "keywords": ["autosnippet", "vitepress", "documentation", "knowledge-engine", "architecture"],
+  "author": "GaoXuefeng <https://github.com/GxFn>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/GxFn/autosnippet-book/issues"
+  },
+  "homepage": "https://github.com/GxFn/autosnippet-book#readme",
+  "devDependencies": {
+    "vitepress": "^1.6.4"
+  }
+}
