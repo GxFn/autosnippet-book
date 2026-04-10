@@ -1,4 +1,4 @@
-# Ch17. Vector 向量化
+# Vector 向量化
 
 > Embedding 存储与检索 — 语义搜索的基石。
 
@@ -35,5 +35,5 @@
 <!-- TODO -->
 
 ::: tip 下一章
-[Ch18. Task & Signal 任务图与信号](./ch18-task-signal)
+[Task & Signal 任务图与信号](./ch18-task-signal)
 :::

@@ -1,4 +1,4 @@
-# Ch31. 六层纵深防御体系
+# 六层纵深防御体系
 
 > Constitution → Gateway → Permission → SafetyPolicy → PathGuard → ConfidenceRouter
 
@@ -48,5 +48,5 @@
 <!-- TODO -->
 
 ::: tip 下一章
-[Ch32. PathGuard 与开发仓库保护](./ch32-pathguard)
+[PathGuard 与开发仓库保护](./ch32-pathguard)
 :::

@@ -1,4 +1,4 @@
-# Ch32. PathGuard 与开发仓库保护
+# PathGuard 与开发仓库保护
 
 > 两层路径安全防御 + isOwnDevRepo 开发环境保护。
 
@@ -45,5 +45,5 @@ PathGuard 是 AutoSnippet 的文件系统安全层，防止路径遍历攻击和
 <!-- TODO -->
 
 ::: tip 下一章
-[Ch33. 测试策略](./ch33-testing)
+[测试策略](./ch33-testing)
 :::

@@ -1,4 +1,4 @@
-# Ch10. 11 维健康评估
+# 11 维健康评估
 
 > 不只是"有没有文档"，而是从 11 个维度评估知识库的健康度。
 
@@ -25,5 +25,5 @@ Dimension 模块定义了 11 个独立维度来评估知识库和项目的健康
 <!-- TODO -->
 
 ::: tip 下一章
-[Ch11. Recipe 与 Candidate 的设计权衡](./ch11-recipe-candidate)
+[Recipe 与 Candidate 的设计权衡](./ch11-recipe-candidate)
 :::

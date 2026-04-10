@@ -1,4 +1,4 @@
-# Ch28. 飞书 / IDE 多端接入
+# 飞书 / IDE 多端接入
 
 > WSS 长连接、零端口暴露 — 远程编程接入的实现。
 
@@ -32,5 +32,5 @@ AutoSnippet 支持飞书自建应用和多种 IDE 的接入。本章解析飞书
 <!-- TODO -->
 
 ::: tip 下一章
-[Ch29. Dashboard 状态管理](../part7/ch29-dashboard)
+[Dashboard 状态管理](../part7/ch29-dashboard)
 :::

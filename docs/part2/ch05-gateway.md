@@ -1,4 +1,4 @@
-# Ch05. Gateway 统一管线
+# Gateway 统一管线
 
 > validate → guard → route → audit — 所有请求的必经之路。
 
@@ -53,5 +53,5 @@ Request → [Validate] → [Guard] → [Route] → Service → Response
 <!-- TODO -->
 
 ::: tip 下一章
-[Ch06. AST 多语言分析](./ch06-ast)
+[AST 多语言分析](./ch06-ast)
 :::

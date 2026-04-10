@@ -1,4 +1,4 @@
-# Ch04. Constitution 权限体系
+# Constitution 权限体系
 
 > RBAC 5 角色模型 — 从配置文件到运行时权限守卫。
 
@@ -57,5 +57,5 @@ constitution.yaml → ConfigLoader → ConstitutionService → Gateway.validate(
 <!-- TODO -->
 
 ::: tip 下一章
-[Ch05. Gateway 统一管线](./ch05-gateway)
+[Gateway 统一管线](./ch05-gateway)
 :::

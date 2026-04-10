@@ -7,7 +7,7 @@ hero:
   actions:
     - theme: brand
       text: 开始阅读
-      link: /part1/ch01-evolution
+      link: /part1/ch01-introduction
     - theme: alt
       text: GitHub
       link: https://github.com/GxFn/AutoSnippet

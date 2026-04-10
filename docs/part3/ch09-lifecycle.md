@@ -1,4 +1,4 @@
-# Ch09. 知识生命周期 — 6 态状态机
+# 知识生命周期 — 6 态状态机
 
 > Draft → Candidate → Review → Active → Deprecated → Archived — 每条知识的完整旅程。
 
@@ -40,5 +40,5 @@ stateDiagram-v2
 <!-- TODO -->
 
 ::: tip 下一章
-[Ch10. 11 维健康评估](./ch10-dimension)
+[11 维健康评估](./ch10-dimension)
 :::

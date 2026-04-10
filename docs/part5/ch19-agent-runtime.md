@@ -1,4 +1,4 @@
-# Ch19. AgentRuntime — ReAct 推理循环
+# AgentRuntime — ReAct 推理循环
 
 > Reasoning + Acting — Agent 如何思考和行动的核心引擎。
 
@@ -40,5 +40,5 @@ Observe → Think → Act → Observe → Think → Act → ... → Final Answer
 <!-- TODO -->
 
 ::: tip 下一章
-[Ch20. 54 个内置工具的设计模式](./ch20-tools)
+[54 个内置工具的设计模式](./ch20-tools)
 :::

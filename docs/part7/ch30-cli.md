@@ -1,4 +1,4 @@
-# Ch30. CLI 14 命令的设计
+# CLI 14 命令的设计
 
 > `asd` — 14 个命令的统一入口与实现。
 
@@ -41,5 +41,5 @@
 <!-- TODO -->
 
 ::: tip 下一章
-[Ch31. 六层纵深防御体系](../part8/ch31-defense-layers)
+[六层纵深防御体系](../part8/ch31-defense-layers)
 :::

@@ -1,4 +1,4 @@
-# Ch11. Recipe 与 Candidate 的设计权衡
+# Recipe 与 Candidate 的设计权衡
 
 > 为什么需要两个阶段？为什么不直接入库？
 
@@ -41,5 +41,5 @@
 <!-- TODO -->
 
 ::: tip 下一章
-[Ch12. Bootstrap 冷启动](../part4/ch12-bootstrap)
+[Bootstrap 冷启动](../part4/ch12-bootstrap)
 :::

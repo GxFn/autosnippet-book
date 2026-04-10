@@ -1,4 +1,4 @@
-# Ch12. Bootstrap 冷启动
+# Bootstrap 冷启动
 
 > 从零到知识库 — `asd setup` 背后发生了什么。
 
@@ -36,5 +36,5 @@ asd setup
 <!-- TODO -->
 
 ::: tip 下一章
-[Ch13. Search 统合搜索](./ch13-search)
+[Search 统合搜索](./ch13-search)
 :::

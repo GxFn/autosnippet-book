@@ -1,4 +1,4 @@
-# Ch13. Search 统合搜索
+# Search 统合搜索
 
 > keyword / semantic / weighted — 三种模式的统合与权衡。
 
@@ -44,5 +44,5 @@ Query → IntentAnalysis → ModeSelection → Search Engine → Scoring → Ran
 <!-- TODO -->
 
 ::: tip 下一章
-[Ch14. Guard 规范检查引擎](./ch14-guard)
+[Guard 规范检查引擎](./ch14-guard)
 :::

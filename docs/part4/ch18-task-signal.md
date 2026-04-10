@@ -1,4 +1,4 @@
-# Ch18. Task & Signal 任务图与信号
+# Task & Signal 任务图与信号
 
 > TaskGraph 管理复杂操作的依赖，Signal 总线追踪系统事件。
 
@@ -26,5 +26,5 @@ Task 模块负责管理多步骤操作的生命周期（如冷启动、批量扫
 <!-- TODO -->
 
 ::: tip 下一章
-[Ch19. AgentRuntime ReAct 推理循环](../part5/ch19-agent-runtime)
+[AgentRuntime ReAct 推理循环](../part5/ch19-agent-runtime)
 :::

@@ -1,4 +1,4 @@
-# Ch23. 意图分类与路由策略
+# 意图分类与路由策略
 
 > 用户说了什么？应该调用哪个工具？
 
@@ -30,5 +30,5 @@ IntentClassifier 负责将用户请求分类为特定意图，AgentRouter 负责
 <!-- TODO -->
 
 ::: tip 下一章
-[Ch24. DI 容器设计](../part6/ch24-di-container)
+[DI 容器设计](../part6/ch24-di-container)
 :::
