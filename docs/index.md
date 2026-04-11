@@ -3,7 +3,7 @@ layout: home
 hero:
   name: AutoSnippet
   text: 技术解构
-  tagline: 从 150 行 Shell 脚本到 12 万行 AI 知识引擎 — 每一个设计决策的深度解读
+  tagline: 从 SOUL 原则到 12 万行实现 — 一个 AI 知识引擎的完整设计故事
   actions:
     - theme: brand
       text: 开始阅读
@@ -13,16 +13,22 @@ hero:
       link: https://github.com/GxFn/AutoSnippet
 
 features:
+  - icon: 🧠
+    title: Part I · 起点与哲学
+    details: 问题定义、SOUL 原则、5 项设计哲学如何化为 12 万行代码中的工程决策
   - icon: 🏗️
-    title: 架构解构
-    details: DDD 分层、递归模式、13 个核心模块的设计动机与实现细节
+    title: Part II · 工程基石
+    details: 7 层 DDD 架构、六层纵深防御安全管线、10 语言 Tree-sitter AST 分析
+  - icon: 📦
+    title: Part III · 知识领域
+    details: 统一实体建模、六态生命周期状态机、25 维质量评分框架
+  - icon: ⚙️
+    title: Part IV · 核心服务
+    details: 14 阶段冷启动、四层 Guard 免疫系统、三模式混合搜索引擎
   - icon: 🤖
-    title: Agent 智能层
-    details: ReAct 推理循环、54 个工具、6 层记忆系统、工具锻造机制
-  - icon: 🔍
-    title: 搜索与向量化
-    details: keyword/semantic/weighted 三模式统合搜索的工程实现
-  - icon: 🛡️
-    title: 工程实践
-    details: 六层纵深防御、50+ Guard 规则、PathGuard 安全边界
+    title: Part V · Agent 智能层
+    details: ReAct 推理循环、Capability × Strategy × Policy 正交组合、61+ 工具与记忆系统
+  - icon: 🚀
+    title: Part VI · 平台与交付
+    details: MCP 协议实现、六通道知识交付、Dashboard · CLI · 多端接入
 ---

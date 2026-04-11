@@ -1,0 +1,12 @@
+Style constraints (MUST follow strictly):
+- Hand-drawn wobble ink lines, sketch doodle aesthetic, like a designer's notebook sketch
+- Black/dark gray (#1A1A1A) ink on pure white (#FFFFFF) background
+- Only 3 accent colors allowed: pale blue (#A8D4F0), pale yellow (#F9E79F), pale pink (#FADBD8) — use sparingly as light fills, NOT outlines
+- Geometric shapes: rounded rectangles, circles, hexagons, simple arrows with hand-drawn imperfection
+- Stick-figure style icons and simple pictograms, NO realistic illustrations or clip art
+- Large white space margins on all sides, clean and intellectual feel
+- All visible text MUST be in Chinese (bold for titles, regular weight for labels), clearly legible
+- NO photographs, NO 3D rendering, NO gradients, NO drop shadows, NO decorative borders, NO background textures
+- Pure flat hand-drawn illustration, single consistent line weight throughout
+- Aspect ratio: 3:4 portrait orientation
+- Information hierarchy: title at top → main visual in center → annotations at bottom

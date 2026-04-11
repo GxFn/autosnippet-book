@@ -25,3 +25,13 @@
     margin-top: 8px !important;
   }
 }
+
+/* 限制文章内图片尺寸 */
+.vp-doc img {
+  max-width: 100%;
+  max-height: 560px;
+  width: auto;
+  height: auto;
+  display: block;
+  margin: 1.5rem auto;
+}
