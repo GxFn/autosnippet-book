@@ -281,17 +281,29 @@ interface CreateRecipeResult {
 }
 ```
 
-**Step 1 — Schema Validation**：`UnifiedValidator` 检查必填字段（title、trigger、description 等）的合法性，同时在批量提交中追踪已提交的标题和指纹集合（`existingTitles` / `existingFingerprints`），防止批量内重复。
+**Step 1 — Schema Validation**
 
-**Step 2 — Similarity Check**：对每个候选调用 `findSimilarRecipes()`，阈值 0.5 召回候选、0.7 判定重复。重复项记入 `duplicates[]` 但不阻塞（信息性警告）。`batch-import` 来源可通过 `skipSimilarityCheck` 跳过此步骤。
+`UnifiedValidator` 检查必填字段（title、trigger、description 等）的合法性，同时在批量提交中追踪已提交的标题和指纹集合（`existingTitles` / `existingFingerprints`），防止批量内重复。
 
-**Step 3 — Consolidation Scan**：`ConsolidationAdvisor.analyzeBatch()` 对通过相似度检查的候选做融合分析——如果发现某个候选与已有 Recipe 高度重叠，建议 merge、reorganize 或 supersede。建议被转换为 Evolution Proposal 写入 `evolution_proposals` 表，候选本身不创建。ConsolidationAdvisor 失败时静默降级——直接进入 Step 4。
+**Step 2 — Similarity Check**
 
-**Step 4 — Create**：通过 `KnowledgeService.create()` 写入数据库，`ConfidenceRouter` 根据置信度决定进入 `staging` 还是 `pending`。
+对每个候选调用 `findSimilarRecipes()`，阈值 0.5 召回候选、0.7 判定重复。重复项记入 `duplicates[]` 但不阻塞（信息性警告）。`batch-import` 来源可通过 `skipSimilarityCheck` 跳过此步骤。
 
-**Step 5 — Quality Scoring**：创建后立即调用 `updateQuality()` 执行 5 维度质量评分。这是 best effort——评分失败不回滚创建。
+**Step 3 — Consolidation Scan**
 
-**Step 6 — Supersede Proposal**：如果调用方指定了 `options.supersedes`（被替代的旧 Recipe ID），在新 Recipe 创建成功后自动创建 `supersede` 类型的进化提案，关联新旧 Recipe。
+`ConsolidationAdvisor.analyzeBatch()` 对通过相似度检查的候选做融合分析——如果发现某个候选与已有 Recipe 高度重叠，建议 merge、reorganize 或 supersede。建议被转换为 Evolution Proposal 写入 `evolution_proposals` 表，候选本身不创建。ConsolidationAdvisor 失败时静默降级——直接进入 Step 4。
+
+**Step 4 — Create**
+
+通过 `KnowledgeService.create()` 写入数据库，`ConfidenceRouter` 根据置信度决定进入 `staging` 还是 `pending`。
+
+**Step 5 — Quality Scoring**
+
+创建后立即调用 `updateQuality()` 执行 5 维度质量评分。这是 best effort——评分失败不回滚创建。
+
+**Step 6 — Supersede Proposal**
+
+如果调用方指定了 `options.supersedes`（被替代的旧 Recipe ID），在新 Recipe 创建成功后自动创建 `supersede` 类型的进化提案，关联新旧 Recipe。
 
 这个设计的核心价值是**入口统一**——Agent 通过 `submit_knowledge` 工具调用和用户通过 MCP `autosnippet_submit_knowledge` 走完全相同的校验管线。没有"捷径"可以绕过 Schema Validation 或 Similarity Check 直接创建 Recipe。
 
