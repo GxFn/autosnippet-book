@@ -531,7 +531,7 @@ if (previousSnapshot.episodicData) {
 
 一次完整冷启动的时间线，以一个 365 个 Swift 文件的 iOS 项目为例：
 
-```text
+```yaml
 T+0ms     Phase 0  ──  fullReset()         清理 8 张表 + 衍生文件
 T+80ms    Phase 1  ──  文件收集             365 files, 12 targets (SPM)
 T+280ms   Phase 1.5 ── AST 分析            142 classes, 28 protocols

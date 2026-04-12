@@ -181,7 +181,7 @@ maxConcurrency = 2   // 最多 2 个批次并行（p-limit 背压控制）
 
 索引构建的完整流程：**scan → chunk → detect → embed → upsert**。
 
-```text
+```yaml
 1. 扫描：遍历 recipes/ 目录，收集 .md/.swift/.ts 等 14 种扩展名
 2. 分块：Chunker v2 自动选择策略（AST / section / fixed）
    - maxChunkTokens = 512, overlapTokens = 50
@@ -288,7 +288,7 @@ class DatabaseConnection {
 
 ServiceContainer 的初始化是一个精心编排的启动序列——9 个模块按严格顺序注册，因为模块之间有依赖关系：
 
-```text
+```yaml
 ① Bootstrap 组件注入（database · auditLogger · gateway）
 ② AiModule.initialize()     → AI Provider 初始化
 ③ InfraModule.register()     → 数据库 · 缓存 · 日志 · 8+ 仓储

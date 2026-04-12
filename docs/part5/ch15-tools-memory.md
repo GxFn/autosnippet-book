@@ -188,7 +188,7 @@ interface CompositionStep {
 
 例如，`analyze_module` 工具可以定义为：
 
-```text
+```yaml
 Step 1: get_class_hierarchy(module="Payment")
   → extractKey: "classes"
 Step 2: (prevResult) => detect_patterns(classes=prevResult.classes)
@@ -577,7 +577,7 @@ L3（> 95% 预算）：只保留系统提示 + 最后 1 轮 + 提交记录
 
 ### 场景 1：记忆驱动的智能跳过
 
-```text
+```yaml
 Agent（Chat 模式）：用户问"Payment 模块的设计模式"
 
 1. MemoryCoordinator.injectStaticMemory():
@@ -594,7 +594,7 @@ Agent（Chat 模式）：用户问"Payment 模块的设计模式"
 
 ### 场景 2：ToolForge 组合锻造
 
-```text
+```yaml
 Agent（Insight 模式）：分析 NetworkKit 模块的完整架构
 
 1. ForgeRequest: { intent: "分析 NetworkKit 完整架构", action: "analyze", target: "NetworkKit" }
@@ -614,7 +614,7 @@ Agent（Insight 模式）：分析 NetworkKit 模块的完整架构
 
 ### 场景 3：ExplorationTracker 引导收敛
 
-```text
+```yaml
 Agent（Bootstrap 模式）：扫描 "networking" 维度
 
 Iter 1-5: EXPLORE 阶段

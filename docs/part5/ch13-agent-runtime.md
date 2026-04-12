@@ -599,7 +599,7 @@ Quality Gate 是三态评估器——不是简单的 pass/fail：
 
 用户消息到达后，`AgentRouter` 按照**递减优先级**决定使用哪个 Preset：
 
-```text
+```yaml
 1. 手动指定（opts.preset 参数）        → 直接使用
 2. 通道启发式（如 "> command" 前缀）   → remote-exec
 3. 关键词匹配（正则规则，零延迟）       → insight / remote-exec / ...

@@ -361,7 +361,7 @@ VSCode Extension（每 3 秒轮询）
 
 ### 场景 1：项目初始化到首次 Dashboard 使用
 
-```text
+```yaml
 ① 终端：asd setup
    → 创建 .autosnippet/ 目录结构
    → 生成 MCP 配置（.cursor/mcp.json · .vscode/mcp.json · .claude/mcp.json）
@@ -386,7 +386,7 @@ VSCode Extension（每 3 秒轮询）
 
 ### 场景 2：飞书讨论到知识入库
 
-```text
+```yaml
 ① 飞书群：开发者 A 说"我们的错误处理应该统一用 Result<T> 类型"
 
 ② LarkTransport.receive(rawEvent)
@@ -411,7 +411,7 @@ VSCode Extension（每 3 秒轮询）
 
 ### 场景 3：VSCode 中的无感交互
 
-```text
+```yaml
 ① 开发者在 VS Code 中编写代码：
    // as:s cookie management pattern
 

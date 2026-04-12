@@ -44,7 +44,7 @@ RRF_score = Σ(i ∈ {dense, sparse}) alpha_i × 1 / (k + rank_i)
 
 RRF 的优雅之处在于它**只用排名，不用分数**。字段加权的分数范围可能是 0–15，向量相似度的范围是 0–1——两者直接相加毫无意义。但排名是可比的：字段加权排第 1 + 向量排第 3 = 融合后排名很高。$k=60$ 控制平滑度——$k$ 越大，排名差距被压缩得越多，前几名的优势越不明显。
 
-```text
+```yaml
 例: 
   Recipe A: Weighted rank 1, Vector rank 5
   RRF = 0.5 × 1/(60+1) + 0.5 × 1/(60+5)
@@ -151,7 +151,7 @@ $$\text{rankerScore} = \sum_{s \in \text{signals}} w_s \times v_s$$
 
 RRF 融合给出了一个初步排名。但初步排名不够精确——相关度只是排名依据的冰山一角。AutoSnippet 用四级重排管线逐步精炼结果：
 
-```text
+```yaml
 召回 (FieldWeighted + Vector, RRF 融合)
   │ 3× 过采样
   │
@@ -304,7 +304,7 @@ $$q_i = \text{round}\left(\frac{v_i - \min_i}{\max_i - \min_i} \times 255\right)
 
 知识库冷启动时需要对所有 Recipe 生成向量。逐条调用 embedding API 极慢——100 条 Recipe × 300ms/条 = 30 秒。`BatchEmbedder` 把文本按 32 条一批打包，最多 2 批并发：
 
-```text
+```yaml
 串行: 100 条 × 300ms = 30s
 批量: 100 条 / 32 = 4 批 × 300ms / 2 并发 ≈ 0.6s
 加速: ~50×
@@ -330,7 +330,7 @@ Embedding 服务还有断路器保护：连续 3 次失败后打开断路器，6
 
 向量搜索的前提是索引存在。`IndexingPipeline` 负责从 Recipe 文件构建向量索引，分五个阶段：
 
-```text
+```yaml
 1. 扫描 (Scan)
    遍历 recipes/ 目录 → 计算 sourceHash 检测变更
    │
@@ -359,7 +359,7 @@ Embedding 服务还有断路器保护：连续 3 次失败后打开断路器，6
 
 **场景 1：通用搜索**
 
-```text
+```yaml
 用户查询: "网络请求怎么写"
 模式: auto
 
@@ -382,7 +382,7 @@ Embedding 服务还有断路器保护：连续 3 次失败后打开断路器，6
 
 **场景 2：Guard lint 搜索**
 
-```text
+```yaml
 Guard 需要检查 "dispatch_sync" 相关规则
 模式: auto, 场景: lint
 
@@ -395,7 +395,7 @@ Guard 需要检查 "dispatch_sync" 相关规则
 
 **场景 3：会话上下文搜索**
 
-```text
+```yaml
 会话历史中已讨论 "SwiftUI", "MVVM", "ObservableObject"
 当前查询: "数据绑定"
 模式: context
@@ -412,7 +412,7 @@ Guard 需要检查 "dispatch_sync" 相关规则
 
 **场景 4：学习场景**
 
-```text
+```yaml
 初学者搜索 "设计模式"
 模式: auto, 场景: learning, userLevel: beginner
 

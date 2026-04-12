@@ -128,7 +128,7 @@ Tarjan 算法步骤：
 2. **Kahn 拓扑排序**（确保 DAG 有效）
 3. **最长路径计算**（DFS + 记忆化）——从每个节点到汇点（无出边节点）的最长路径决定了它的层级
 
-```text
+```python
 最长路径算法：
   memo[node] = 从 node 到汇点的最长路径
 
@@ -367,7 +367,7 @@ baseline = 0.8 × baseline + 0.2 × count  // 指数移动平均
 
 完整的代谢循环包含三个检测器和一个提案生成器：
 
-```text
+```yaml
 runFullCycle():
   ├── ① DecayDetector.evaluate()    → 衰退评分
   ├── ② ContradictionDetector.scan() → 矛盾检测
@@ -566,7 +566,7 @@ Panorama 重新计算
 
 **场景 2：90 天无命中 → 衰退流程**
 
-```text
+```yaml
 DecayDetector 评估 @legacy-callback-pattern:
   freshness: (100 - 200) / 100 = 0 (clip to 0)
   usage: 0 / 5 = 0 (90天 0 次命中)
@@ -582,7 +582,7 @@ DecayDetector 评估 @legacy-callback-pattern:
 
 **场景 3：代码重构 → 矛盾检测**
 
-```text
+```yaml
 项目从 NSLock 迁移到 actor：
   新 Recipe: "使用 actor 进行状态隔离"
   旧 Recipe: "使用 NSLock 保护共享状态"
@@ -599,7 +599,7 @@ ContradictionDetector:
 
 **场景 4：Panorama 发现知识空白**
 
-```text
+```yaml
 PanoramaService.getGaps():
   DimensionAnalyzer 扫描:
     "网络与 API": 8 条 Recipe → strong ✓

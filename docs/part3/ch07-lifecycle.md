@@ -252,7 +252,7 @@ authority = baseAuthority × (1 - staleRatio × 0.3)
 
 管线分为 7 个步骤，每个步骤有独立的中止和回退逻辑：
 
-```text
+```yaml
 Step 1: Schema Validation (UnifiedValidator)
     ↓ 不通过 → rejected[]
 Step 2: Similarity Check (可选跳过)
@@ -361,7 +361,7 @@ async checkTimeouts(): Promise<TimeoutCheckResult> {
 
 `DecayDetector` 是衰退信号的核心引擎。它不是简单地检查"最后使用时间是否超过 N 天"——而是用四个维度综合评估一条知识的健康度：
 
-```text
+```yaml
 decayScore = freshness × 0.3 + usage × 0.3 + quality × 0.2 + authority × 0.2
 ```
 
