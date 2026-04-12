@@ -4,8 +4,6 @@
 
 AutoSnippet 是一个 **AI 驱动的项目知识引擎**——它从代码中提取知识、持续进化知识、在开发时交付知识。本文用图解方式，沿着系统的六大部分快速走一遍。
 
----
-
 ## Part I · 起点与哲学
 
 ### 核心工作流
@@ -28,8 +26,6 @@ AutoSnippet 本质上做两件事：**一次构建有限答案，持续回答无
 
 ![SOUL 宪章](/images/ch02/01-soul-charter.png)
 
----
-
 ## Part II · 工程基石
 
 ### 七层分层架构
@@ -49,8 +45,6 @@ AutoSnippet 本质上做两件事：**一次构建有限答案，持续回答无
 代码理解是五阶段管线：单文件 AST 解析（Tree-sitter WASM, 10 语言）→ 继承图构建 → 调用图推断（5 步增量管线）→ 设计模式检测（Singleton/Delegate/Factory/Observer）→ Tarjan SCC + Kahn 拓扑分层。最终输出 ProjectGraph 供 Panorama 消费。
 
 ![结构分析链](/images/ch05/01-structural-analysis-chain.png)
-
----
 
 ## Part III · 知识领域
 
@@ -102,8 +96,6 @@ AutoSnippet 本质上做两件事：**一次构建有限答案，持续回答无
 
 ![置信度路由](/images/ch08/02-confidence-router-pipeline.png)
 
----
-
 ## Part IV · 核心服务
 
 ### Bootstrap 双路径架构
@@ -130,8 +122,6 @@ AutoSnippet 本质上做两件事：**一次构建有限答案，持续回答无
 
 ![三系统数据链路](/images/ch12/01-three-system-dataflow.png)
 
----
-
 ## Part V · Agent 智能层
 
 ### AgentRuntime — ReAct 循环
@@ -152,8 +142,6 @@ Agent 的行为由三个正交维度决定：Capability（能做什么）× Stra
 
 ![工具与记忆全景](/images/ch15/01-tools-memory-overview.png)
 
----
-
 ## Part VI · 平台与交付
 
 ### 数据基础设施
@@ -173,8 +161,6 @@ Agent 的行为由三个正交维度决定：Capability（能做什么）× Stra
 四种界面形态共享一个 ServiceContainer 内核：CLI（Commander.js 18+ 命令）、Dashboard（React 19 + Socket.IO 实时推送）、VSCode Extension（CodeLens + Guard 诊断）、飞书 Lark Transport（群聊→知识入口）。业务逻辑在 Service 层，界面层不含数据访问。
 
 ![四端接入架构](/images/ch18/01-four-interface-architecture.png)
-
----
 
 ## 一句话总结
 
