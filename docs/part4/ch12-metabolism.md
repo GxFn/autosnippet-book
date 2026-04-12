@@ -456,7 +456,7 @@ const NEGATION_EN = /\b(don'?t|do\s+not|never|no\s+longer|removed?|deprecated?|s
 |:---|:---|:---|:---|
 | Title 相似度 | 0.2 | Jaccard ≥ 0.7 | 标题 token 集合的 Jaccard 相似度 |
 | Clause 相似度 | 0.3 | ≥ 0.6 | doClause + dontClause 文本匹配 |
-| Code 相似度 | 0.3 | ≥ 0.8 | $1 - \text{Levenshtein}(a, b) / \max(|a|, |b|)$ |
+| Code 相似度 | 0.3 | ≥ 0.8 | $1 - \text{Levenshtein}(a, b) / \max(\lvert a\rvert, \lvert b\rvert)$ |
 | Guard 匹配 | 0.2 | 精确相等 | guard pattern 是否完全相同 |
 
 综合分数超过 **0.65** 就标记为冗余对：
