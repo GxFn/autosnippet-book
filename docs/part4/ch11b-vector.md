@@ -187,7 +187,7 @@ $$\text{level} = \lfloor -\ln(1 - U) \times m_L \rfloor, \quad U \sim \text{Unif
 
 向量的插入分两个阶段：
 
-```text
+```python
 addPoint(id, vector):
   ① 如果 id 已存在 → removePoint 移除旧节点（支持更新语义）
   ② 随机选层 nodeLevel
@@ -231,7 +231,7 @@ addPoint(id, vector):
 
 搜索也分两个阶段，但语义不同：
 
-```text
+```python
 searchKnn(queryVector, k):
 
   Phase 1 — 贪心下降 L_max → L1:
@@ -267,7 +267,7 @@ Phase 1 用贪心搜索快速逼近——每层只保留 1 个最近邻。Phase 
 
 `searchLayer` 是 HNSW 中最核心的子过程，同时被插入和查询使用：
 
-```text
+```python
 searchLayer(query, entryNodeIdx, ef, level):
   visited = Set{entryNodeIdx}
   candidates = MinHeap{(entryNode, dist)}   // 待探索，最近优先
@@ -318,7 +318,7 @@ HNSW 论文提出了两种邻居选择策略：Simple（按距离选最近的）
 
 **裁剪**发生在新节点连接时——如果某个已有节点的邻居数超过了 M（或 M0），需要移除最远的邻居：
 
-```text
+```python
 pruneConnections(nodeIdx, level):
   neighbors = getNeighbors(level, nodeIdx)
   if neighbors.size <= limit: return
@@ -594,7 +594,7 @@ const CRC32_TABLE = (() => {
 
 ### 刷盘策略
 
-```text
+```python
 写操作 → appendWal(op)
   ① 追加到 pendingOps[] 内存队列
   ② appendFileSync 追加到 .wal 文件（同步，保证不丢）
@@ -617,7 +617,7 @@ doFlush():
 
 ### 恢复流程
 
-```text
+```python
 启动时:
   ① 加载 .asvec 主文件 → 恢复 HnswIndex + ScalarQuantizer
   ② 检查 .wal 文件是否存在
@@ -671,7 +671,7 @@ DEFAULT_OVERLAP_TOKENS = 50;
 
 按 Markdown 标题（`#`、`##`、`###`）切分段落：
 
-```text
+```markdown
 # 标题 A
 段落内容...
 
@@ -740,7 +740,7 @@ const TOP_LEVEL_TYPES = new Set([
 
 **递归拆分超大节点**：
 
-```text
+```python
 splitLargeNode(node):
   chunks = []
   currentGroup = ""
@@ -877,7 +877,7 @@ maxConcurrency = 2;   // 最大并行批次 (p-limit 控制)
 
 ### 三级降级
 
-```text
+```python
 embedAll(items):
   batches = chunkArray(items, 32)
   await Promise.all(batches.map(batch => limit(() => embedBatch(batch))))
@@ -914,7 +914,7 @@ embedBatch(items):
 
 ### 五阶段 Pipeline
 
-```text
+```python
 IndexingPipeline.run():
 
 Phase 0: Clear (可选, forceRebuild=true 时)
@@ -1040,7 +1040,7 @@ EventBus('knowledge:deleted') ──► SyncCoordinator.enqueue(entryId, 'remove
 
 系统启动时或定期执行对账，确保向量索引和数据库保持一致：
 
-```text
+```python
 reconcile():
   vectorIds  = vectorStore.listIds()      // 向量索引中的所有 ID
   dbEntryIds = db.listActiveEntryIds()    // 数据库中的所有活跃条目
