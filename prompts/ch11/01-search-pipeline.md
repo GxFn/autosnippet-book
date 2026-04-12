@@ -18,8 +18,10 @@ Lane 2 (pale green fill): "HNSW 向量语义"
   Small note: "SQ8 量化 · 内存省 75%"
 
 Two lanes converge into a diamond shape labeled "RRF 融合":
-  Annotation: "k=60 · 权重 FieldWeighted 0.6 : Semantic 0.4"
-  Sub-note: "只用排名不用分数 · AI 断路器打开时降级为纯 FieldWeighted"
+  Annotation: "k=60 · 自适应 α (0.4–0.75)"
+  Sub-note below diamond: "α = 0.4 + 0.35 × (1 − conf/60)"
+  Small callout: "confidence 越低 → semantic 权重越高"
+  Extra note: "AI 断路器打开时降级为纯 FieldWeighted"
 
 CENTER-RIGHT — "重排阶段" (Reranking Phase):
 Three vertically stacked boxes connected by downward arrows:

@@ -1,6 +1,6 @@
 # 图解速览 — 一张图读懂 AutoSnippet
 
-> 24 张手绘风格架构图，5 分钟快速理解整个系统。
+> 25 张手绘风格架构图，5 分钟快速理解整个系统。
 
 AutoSnippet 是一个 **AI 驱动的项目知识引擎**——它从代码中提取知识、持续进化知识、在开发时交付知识。本文用图解方式，沿着系统的六大部分快速走一遍。
 
@@ -112,9 +112,15 @@ AutoSnippet 本质上做两件事：**一次构建有限答案，持续回答无
 
 ### Search 混合检索
 
-搜索引擎融合三种模式：关键词（字段加权 BM25）、语义（向量余弦相似度）、上下文感知（代码片段分析）。结果经过 RRF 融合排序后返回。
+搜索引擎融合双路召回：FieldWeighted 字段加权（trigger ×5、title ×3、tags ×2）+ HNSW 向量语义（本地 Ollama Embedding，毫秒级推理）。结果经过自适应 alpha RRF 融合 + 三级重排（CoarseRanker → MultiSignalRanker → ContextBoost）后返回。
 
 ![Search 管线](/images/ch11/01-search-pipeline.png)
+
+### Confidence Gate 查询路由
+
+SearchEngine 的 auto 模式先跑关键词评估 Confidence（0–100），基于标题匹配、CamelCase 识别、分数断崖等正负向信号决定是否调用语义搜索。高置信度（≥60）直接返回关键词结果（40ms）；低置信度走 RRF 融合，alpha 自适应：`α = 0.4 + 0.35 × (1 - conf/60)`——confidence 越低，语义权重越高。
+
+![Confidence Gate](/images/ch11/02-confidence-gate.png)
 
 ### Panorama · Signal · 代谢
 
