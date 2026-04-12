@@ -305,7 +305,7 @@ KnowledgeEntry 在内存中是 TypeScript 对象，但持久化形式是 Markdow
 
 一个 Recipe 的 Markdown 文件长这样：
 
-```markdown
+````markdown
 ---
 title: CookieProviding 请求封装规范
 trigger: @cookie-providing-pattern
@@ -336,6 +336,8 @@ let cookies = try await provider.fetchCookies(for: url)
 
 ### 错误处理
 ...
+````
+
 ```typescript
 
 **序列化（KnowledgeEntry → Markdown）** 由 `KnowledgeFileWriter` 负责。YAML frontmatter 承载元数据字段（title、trigger、category、language、kind 等），Markdown body 承载 `content.markdown`，代码块承载 `coreCode`。
