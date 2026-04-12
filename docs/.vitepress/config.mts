@@ -10,6 +10,10 @@ export default defineConfig({
     ['link', { rel: 'icon', href: '/favicon.ico' }],
   ],
 
+  markdown: {
+    math: true,
+  },
+
   themeConfig: {
     logo: '/logo.svg',
     siteTitle: 'AutoSnippet Book',
