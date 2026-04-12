@@ -1,6 +1,8 @@
 # AgentRuntime — ReAct 推理循环
 
 > AutoSnippet 的 AI 中枢 — 感知、推理、行动、反思的循环引擎。
+>
+> **相关章节**：Agent 在 [Bootstrap 冷启动](../part4/ch09-bootstrap) 中驱动知识提取，工具和记忆系统详见 [ch15](./ch15-tools-memory)
 
 ## 问题场景
 

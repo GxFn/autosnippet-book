@@ -613,6 +613,8 @@ StyleGuide 与 QualityScorer 形成了"前后夹击"：前者约束 Agent 的生
 
 这三个组件共享一个设计基调：**偏向保守**。不确定的知识进入人工审核而非自动发布，低质量的知识降级而非丢弃，缺乏证据时承认无知而非猜测。在知识引擎中，一条错误的规则比十条缺失的规则造成更大的伤害——因为错误规则会主动污染 AI 的输出。
 
+Part III 到此结束。从 [KnowledgeEntry 统一实体](./ch06-knowledge-entry)、[六态生命周期](./ch07-lifecycle) 到本章的质量评分框架，我们已经看完了知识领域的全部建模。接下来 Part IV 将展示这些知识如何被生产（Bootstrap）、如何被审查（Guard）、如何被检索（Search）、如何自我治理（Metabolism）。
+
 ::: tip 下一章
 [Bootstrap — 冷启动的 14 阶段编排](../part4/ch09-bootstrap)
 :::

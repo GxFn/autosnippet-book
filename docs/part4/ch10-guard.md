@@ -4,7 +4,7 @@
 
 ## 问题场景
 
-知识库里有一条 Recipe："所有网络请求必须设置 30 秒超时"。Agent 按照这条 Recipe 生成了一段网络请求代码。谁来检查这段代码是否**真的**设置了超时？
+知识库里有一条 Recipe：“所有网络请求必须设置 30 秒超时”。Agent 按照这条 Recipe 生成了一段网络请求代码。谁来检查这段代码是否**真的**设置了超时？（Recipe 的质量如何保证，见 [ch08 质量评分](../part3/ch08-quality)）
 
 传统的 lint 工具可以做正则匹配——搜索 `timeout` 关键字是否出现。但"设置超时"在不同语言中有完全不同的表达：Swift 是 `timeoutInterval: 30`，Go 是 `WithTimeout(30 * time.Second)`，JavaScript 是 `AbortSignal.timeout(30000)`。同一条 Recipe，同一个语义约束，代码实现千差万别。
 
