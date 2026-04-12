@@ -142,7 +142,7 @@ AutoSnippet 的 SQLite 数据库包含 14 张表，用 Drizzle ORM 定义 schema
 
 HNSW 是近似最近邻搜索的主流算法。AutoSnippet 的实现遵循原始论文的参数约定：
 
-```
+```text
 M = 16              # 每层最大邻居数
 M0 = 32             # L0 层最大邻居数 (2 × M)
 efConstruct = 200   # 构建时搜索宽度
@@ -156,7 +156,7 @@ mL = 1/ln(M) ≈ 0.72  # 层级采样因子
 
 当文档数超过 3000 时，HNSW 自动启用 **SQ8 标量量化**——把 32 位浮点向量压缩为 8 位整数：
 
-```
+```text
 量化：q_i = round((v_i - min_i) / (max_i - min_i) × 255)
 反量化：v̂_i = q_i / 255 × (max_i - min_i) + min_i
 ```
@@ -181,7 +181,7 @@ maxConcurrency = 2   // 最多 2 个批次并行（p-limit 背压控制）
 
 索引构建的完整流程：**scan → chunk → detect → embed → upsert**。
 
-```
+```text
 1. 扫描：遍历 recipes/ 目录，收集 .md/.swift/.ts 等 14 种扩展名
 2. 分块：Chunker v2 自动选择策略（AST / section / fixed）
    - maxChunkTokens = 512, overlapTokens = 50
@@ -288,7 +288,7 @@ class DatabaseConnection {
 
 ServiceContainer 的初始化是一个精心编排的启动序列——9 个模块按严格顺序注册，因为模块之间有依赖关系：
 
-```
+```text
 ① Bootstrap 组件注入（database · auditLogger · gateway）
 ② AiModule.initialize()     → AI Provider 初始化
 ③ InfraModule.register()     → 数据库 · 缓存 · 日志 · 8+ 仓储
@@ -465,7 +465,7 @@ AI API 调用是 AutoSnippet 运行中唯一有真实成本的操作。`TokenUsa
 
 **Developer Identity**（`developer-identity.ts`）标识 Token 消耗的归属人：
 
-```
+```text
 优先链：AUTOSNIPPET_USER 环境变量 → git config user.name → os.userInfo().username → 'unknown'
 ```
 

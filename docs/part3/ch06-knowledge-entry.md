@@ -14,7 +14,7 @@
 
 最直觉的方案是面向对象继承——定义一个 `BaseKnowledge` 基类，然后为每种类型派生子类：
 
-```
+```text
 BaseKnowledge
 ├── Pattern       (代码模式)
 ├── Decision      (架构决策)
@@ -336,7 +336,7 @@ let cookies = try await provider.fetchCookies(for: url)
 
 ### 错误处理
 ...
-```
+```typescript
 
 **序列化（KnowledgeEntry → Markdown）** 由 `KnowledgeFileWriter` 负责。YAML frontmatter 承载元数据字段（title、trigger、category、language、kind 等），Markdown body 承载 `content.markdown`，代码块承载 `coreCode`。
 
@@ -397,7 +397,7 @@ publish(publisher: string) {
 
 目录结构反映了这种状态分离：
 
-```
+```text
 .autosnippet/
 ├── candidates/     # lifecycle = pending | staging
 │   ├── entry-a.md
@@ -411,7 +411,7 @@ publish(publisher: string) {
 
 审核流程的完整数据路径：
 
-```
+```text
 AI Agent 扫描代码 → 构建 KnowledgeEntry(pending)
        ↓
   UnifiedValidator 三层校验

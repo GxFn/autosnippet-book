@@ -185,7 +185,7 @@ export class Strategy {
 
 最简单的策略：直接把消息交给 `reactLoop()`，跑到终止条件为止。
 
-```
+```text
 SingleStrategy.execute(runtime, message):
   return runtime.reactLoop(message, budget)
 ```
@@ -223,7 +223,7 @@ interface PipelineStage {
 
 以 insight Preset 的四阶段流水线为例：
 
-```
+```text
 Stage 1: analyze
   Capability: code_analysis
   Budget: 24 轮, temperature 0.4
@@ -251,7 +251,7 @@ Stage 4: rejection_gate
 
 FanOut 把一个大任务分解为 N 个子任务，并行执行后合并结果。典型场景是 Bootstrap 冷启动——25 个维度的知识分析可以并行进行。
 
-```
+```text
 FanOutStrategy.execute(runtime, items):
   // 分层并发控制
   tier1Items = items.filter(highPriority)  → 并发 3

@@ -139,7 +139,7 @@ _checkBatch(req) {
 
 Gateway 是所有操作的**唯一入口**。无论请求来自 MCP、HTTP 还是 CLI，都必须通过 Gateway 的 4 步管线：
 
-```
+```text
 请求 → validate → guard → route → audit → 响应
 ```
 
@@ -604,7 +604,7 @@ async route(entry: KnowledgeEntry): Promise<RouteResult> {
 
 六层按请求路径串联，每层解决一个特定维度的安全问题：
 
-```
+```text
 MCP/HTTP/CLI 请求
   │
   ▼ Layer 1: Constitution
@@ -698,7 +698,7 @@ cleanup({ maxAgeDays: 90 })
 
 ### 场景 1：external_agent 尝试删除 Recipe
 
-```
+```text
 → Gateway.execute({ actor: 'external_agent', action: 'recipe:delete', data: { id: 'r-123' } })
   → Step 1: validate ✅ (有 actor 和 action)
   → Step 2: guard
@@ -713,7 +713,7 @@ cleanup({ maxAgeDays: 90 })
 
 ### 场景 2：chat_agent 提交候选知识
 
-```
+```text
 → Gateway.execute({ actor: 'chat_agent', action: 'candidate:create', data: { code: '...', reasoning: {...} } })
   → Step 1: validate ✅
   → Step 2: guard
@@ -730,7 +730,7 @@ cleanup({ maxAgeDays: 90 })
 
 ### 场景 3：Agent 尝试写入项目外文件
 
-```
+```text
 → AgentRuntime 执行 write_project_file({ filePath: '/etc/hosts', content: '...' })
   → PolicyEngine.validateToolCall('write_project_file', { filePath: '/etc/hosts' })
     → SafetyPolicy.checkFilePath('/etc/hosts')

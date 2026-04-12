@@ -55,7 +55,7 @@ setRequestHandler(ListToolsRequestSchema, () => {
 
 **请求流程**——从 IDE 到知识库再回来：
 
-```
+```text
 IDE Agent → CallToolRequest{name, arguments}
   → McpServer._handleToolCall()
     → _gatewayGate()          // 权限检查
@@ -105,7 +105,7 @@ Gateway 关卡是安全边界——不是所有工具调用都需要权限检查
 
 CursorDeliveryPipeline 是交付系统的主引擎——协调六个通道的知识选择、压缩和文件写入。完整的交付流程：
 
-```
+```text
 deliver():
   ① entries ← _loadEntries()           // 加载 active + staging + 高置信度 pending
   ② {rules, patterns, facts, docs} ← _classify(entries)  // 按 kind 分类
@@ -190,7 +190,7 @@ Token 估算使用 CJK 感知算法——中文字符的 token 密度（约 1.3 
 
 **排名得分**决定哪些知识最终进入交付文件：
 
-```
+```text
 score = confidence × 0.4 + authorityScore × 0.3
       + min(useCount, cap) × 0.2 + activeBonus
 ```
@@ -201,7 +201,7 @@ confidence 权重最高——高置信度的知识优先推送。useCount 有上
 
 通道 B+ 是一个独特的通道——它的内容不来自 Recipe，而是从代码库的调用图中**自动推断**：
 
-```
+```text
 1. 从数据库提取调用边（RawDbCallGraphAdapter.findCallEdges()）
 2. 聚合为目录级调用矩阵：'src/controllers' → Map('src/services' → count)
 3. 计算出入度：in-degree 高 = 低层（被调用多 = 基础服务），out-degree 高 = 高层（调用多 = 控制器）
@@ -214,7 +214,7 @@ confidence 权重最高——高置信度的知识优先推送。useCount 有上
 
 技能（Skills）是比规则更长、更深入的文档——描述一个完整的领域实践（如"项目架构概览"、"编码标准"、"设计模式"等）。SkillsSyncer 把 AutoSnippet 管理的技能同步到 `.cursor/skills/` 目录：
 
-```
+```text
 同步两类来源：
   ① 内置技能：从 AutoSnippet 包的 skills/ 目录直接复制
   ② 项目技能：从 AutoSnippet/skills/project-* 转换
@@ -324,7 +324,7 @@ interface IntentState {
 
 Gateway 是 AutoSnippet 的安全和审计中枢——MCP 工具调用和 HTTP API 请求都经过它。四个阶段：
 
-```
+```text
 Validate → Guard → Route → Audit
 
 ① Validate：请求格式校验——actor、action、resource 字段完整性
@@ -344,7 +344,7 @@ MCP Server 使用 Gateway 的两种模式：
 
 HTTP Server 为 Dashboard 和外部集成提供 RESTful API：
 
-```
+```text
 GET  /api/v1/health              → 健康检查
 GET  /api/v1/health/ready        → 就绪检查
 GET  /api/v1/knowledge           → 知识列表（分页 · 过滤）
@@ -362,7 +362,7 @@ GET  /api-spec                   → OpenAPI 规范
 
 中间件栈的顺序经过精心排列：
 
-```
+```text
 performanceMonitor   → 性能追踪（计时开始）
 helmet               → 安全头（CSP · XSS 保护）
 requestLogger        → HTTP 日志
@@ -423,7 +423,7 @@ _mirrorToIDE(targetDirName: string) {
 
 用户执行 `asd setup`。Bootstrap 完成后调用 `CursorDeliveryPipeline.deliver()`：
 
-```
+```text
 知识库：120 条 active Recipe（50 rules · 40 patterns · 20 facts · 10 documents）
 
 → 通道 A：Top 15 规则 → autosnippet-project-rules.mdc (780 tokens)
@@ -451,7 +451,7 @@ Agent 产出了一条新的 `code-pattern`，经过 Guard 验证后进入 `activ
 
 AI Agent 需要了解"这个项目的 Cookie 管理方式"，调用 `autosnippet_search({ query: "cookie management pattern", mode: "auto" })`：
 
-```
+```text
 McpServer._handleToolCall('autosnippet_search', {query, mode})
   → _gatewayGate()：搜索是只读操作，不在 TOOL_GATEWAY_MAP 中，直接放行
   → _resolveHandler()：映射到 consolidated.consolidatedSearch()
@@ -467,7 +467,7 @@ McpServer._handleToolCall('autosnippet_search', {query, mode})
 
 用户同时使用 Cursor 和 Trae。`.cursor/` 下的规则通过正常交付生成后，执行 `asd mirror`：
 
-```
+```text
 → 检测 .cursor/rules/autosnippet-* 文件（6 个）
 → 复制到 .trae/rules/ （保持文件名不变）
 → 检测 .cursor/skills/autosnippet-* 目录（3 个）

@@ -144,7 +144,7 @@ interface ToolMetadata {
 
 ToolForge 解决这个问题：在运行时动态创建新工具。三种锻造模式按成本递增排列，形成瀑布式降级：
 
-```
+```text
 Reuse（0ms）→ 直接从注册表复用现有工具
     ↓ 找不到
 Compose（~10ms）→ 组合多个原子工具为新工具
@@ -156,7 +156,7 @@ Generate（~5s）→ LLM 生成工具代码 → SandboxRunner 验证 → 注册
 
 最轻量的锻造模式：找到一个已有的工具，预填充部分参数。
 
-```
+```text
 需求："搜索 Network 分类的 Recipe"
 匹配：search_recipes(category="Network")
 结果：直接复用 search_recipes，无需新建
@@ -188,7 +188,7 @@ interface CompositionStep {
 
 例如，`analyze_module` 工具可以定义为：
 
-```
+```text
 Step 1: get_class_hierarchy(module="Payment")
   → extractKey: "classes"
 Step 2: (prevResult) => detect_patterns(classes=prevResult.classes)
@@ -563,7 +563,7 @@ interface FullExplorationMetrics extends ExplorationMetrics {
 
 ContextWindow 管理 LLM 的消息历史——确保 token 使用量不超过预算。三级渐进压缩在 Ch13 已概述，这里补充工具相关的细节：
 
-```
+```text
 L1（60-80% 预算）：截断旧轮次的工具结果，保留最近 4 轮完整
 L2（80-95% 预算）：蒸馏旧轮次为摘要，保留最近 2 轮完整
 L3（> 95% 预算）：只保留系统提示 + 最后 1 轮 + 提交记录
@@ -577,7 +577,7 @@ L3（> 95% 预算）：只保留系统提示 + 最后 1 轮 + 提交记录
 
 ### 场景 1：记忆驱动的智能跳过
 
-```
+```text
 Agent（Chat 模式）：用户问"Payment 模块的设计模式"
 
 1. MemoryCoordinator.injectStaticMemory():
@@ -594,7 +594,7 @@ Agent（Chat 模式）：用户问"Payment 模块的设计模式"
 
 ### 场景 2：ToolForge 组合锻造
 
-```
+```text
 Agent（Insight 模式）：分析 NetworkKit 模块的完整架构
 
 1. ForgeRequest: { intent: "分析 NetworkKit 完整架构", action: "analyze", target: "NetworkKit" }
@@ -614,7 +614,7 @@ Agent（Insight 模式）：分析 NetworkKit 模块的完整架构
 
 ### 场景 3：ExplorationTracker 引导收敛
 
-```
+```text
 Agent（Bootstrap 模式）：扫描 "networking" 维度
 
 Iter 1-5: EXPLORE 阶段
@@ -740,7 +740,7 @@ AutoSnippet 的 knowledge-graph 工具模块（`dedup_check`、`add_knowledge_ed
 
 Chhikara et al. 的 *Mem0*（arXiv:2504.19413，ECAI 2025）提出了面向生产的两阶段记忆管线：
 
-```
+```text
 Extraction Phase → 从最新对话/滚动摘要/最近 m 条消息中提取候选记忆
 Update Phase → 新记忆与 top-s 相似旧记忆对比 → ADD / UPDATE / DELETE / NOOP
 ```

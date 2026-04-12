@@ -529,7 +529,7 @@ WHERE id = ?
 
 反馈闭环的完整路径：
 
-```
+```text
 用户操作 → Guard/Search 命中 → HitRecorder 记录 → SignalBus 发射
                                                         ↓
 DecayDetector 实时监听 ← KnowledgeMetabolism ← 30s 批量 flush → DB stats 更新

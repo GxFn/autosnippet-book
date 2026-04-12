@@ -15,7 +15,7 @@
 
 三个子系统、一条数据链路：
 
-```
+```text
 Panorama（感知项目）→ Signal（捕获行为）→ Metabolism（驱动进化）
 ```
 
@@ -96,7 +96,7 @@ Panorama 的第一步是**发现模块**。`ModuleDiscoverer` 用两种策略识
 
 `CouplingAnalyzer` 用 **Tarjan 算法**找到图中所有强连通分量（SCC，Strongly Connected Components）。强连通分量中的所有节点可以互相到达——这就是循环依赖。
 
-```
+```text
 Tarjan 算法步骤：
   对每个未访问节点：
     strongConnect(node):
@@ -128,7 +128,7 @@ Tarjan 算法步骤：
 2. **Kahn 拓扑排序**（确保 DAG 有效）
 3. **最长路径计算**（DFS + 记忆化）——从每个节点到汇点（无出边节点）的最长路径决定了它的层级
 
-```
+```text
 最长路径算法：
   memo[node] = 从 node 到汇点的最长路径
 
@@ -277,7 +277,7 @@ send(type: SignalType, source: string, value: number, opts?: {
 
 如果每次 Guard 命中或搜索命中都直接写数据库，SQLite 的并发写入限制会成为瓶颈。`HitRecorder` 在中间加了一层缓冲：
 
-```
+```text
 信号产生
   │
   ├── 立即：emit 到 SignalBus（供实时消费者使用）
@@ -332,7 +332,7 @@ WHERE id = ?
 
 每种信号类型维护一个 5 分钟的滑动窗口。每 60 秒计算一次窗口内的统计值（count、avg、max、min），写入 ReportStore。关键逻辑是**异常检测**：
 
-```
+```text
 if count > baseline × 3:
   emit('anomaly', ...)   // 信号量突增 3 倍以上
 
@@ -367,7 +367,7 @@ baseline = 0.8 × baseline + 0.2 × count  // 指数移动平均
 
 完整的代谢循环包含三个检测器和一个提案生成器：
 
-```
+```text
 runFullCycle():
   ├── ① DecayDetector.evaluate()    → 衰退评分
   ├── ② ContradictionDetector.scan() → 矛盾检测
@@ -516,7 +516,7 @@ interface EvolutionProposal {
 
 三个子系统不是孤立的——它们形成一条完整的数据链路：
 
-```
+```text
 Bootstrap 生成初始 Panorama
   ↓
 Panorama 发现知识空白
@@ -555,7 +555,7 @@ Panorama 重新计算
 
 **场景 1：搜索命中 → 热度累积**
 
-```
+```text
 用户搜索 "网络层架构"
   → searchHit 信号 → SignalBus 同步分发
   → HitRecorder 缓冲（guardHit 计数 +1）
@@ -566,7 +566,7 @@ Panorama 重新计算
 
 **场景 2：90 天无命中 → 衰退流程**
 
-```
+```text
 DecayDetector 评估 @legacy-callback-pattern:
   freshness: (100 - 200) / 100 = 0 (clip to 0)
   usage: 0 / 5 = 0 (90天 0 次命中)
@@ -582,7 +582,7 @@ DecayDetector 评估 @legacy-callback-pattern:
 
 **场景 3：代码重构 → 矛盾检测**
 
-```
+```text
 项目从 NSLock 迁移到 actor：
   新 Recipe: "使用 actor 进行状态隔离"
   旧 Recipe: "使用 NSLock 保护共享状态"
@@ -599,7 +599,7 @@ ContradictionDetector:
 
 **场景 4：Panorama 发现知识空白**
 
-```
+```text
 PanoramaService.getGaps():
   DimensionAnalyzer 扫描:
     "网络与 API": 8 条 Recipe → strong ✓
