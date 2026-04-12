@@ -64,6 +64,7 @@ export default defineConfig({
           { text: 'Bootstrap 冷启动', link: '/part4/ch09-bootstrap' },
           { text: 'Guard 合规引擎', link: '/part4/ch10-guard' },
           { text: 'Search 混合检索', link: '/part4/ch11-search' },
+          { text: '向量引擎深度解析', link: '/part4/ch11b-vector' },
           { text: 'Panorama · Signal · 代谢', link: '/part4/ch12-metabolism' },
         ],
       },
