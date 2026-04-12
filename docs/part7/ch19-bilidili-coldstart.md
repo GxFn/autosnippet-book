@@ -646,6 +646,54 @@ Channel F: 1 agent instruction file                           (2,165 tokens)
 Total delivery: 26ms
 ```
 
+### 真实样本：一个高质量 Candidate 如何变成交付产物
+
+这里先做一个必要说明：**本轮还停留在 Candidate 阶段，尚未进入人工审核后的正式 Recipe 阶段**，因此 `AutoSnippet/recipes/` 目录为空。所以下面展示的不是“已审核 Recipe”，而是**最接近最终 Recipe 的高质量 Candidate**，以及它进入交付通道后的真实输出形态。
+
+同时也要强调，下面这批结果**并不是由当前最强大的 LLM 生成**。两轮测试使用的是 `gemini-3-flash-preview`，目标是观察当前工程链路在较低成本、偏速度优先模型上的真实表现，而不是展示高配模型的上限。
+
+本章改选一个**独立且唯一**的样本：`@metrics-collector`。之所以换成它，是因为它不是一组规范的组合，而是**围绕同一个类、同一个文件、同一个工程决策**展开，边界更清晰。
+
+1. 它来自 BiliDili 的真实基础设施代码，而不是抽象概念。
+2. 它能同时落到规则、pattern 和 Wiki 三类交付物中。
+3. 它很容易判断是否“像项目自己的知识”，而不是泛化的 Swift 教程。
+
+| 样本 | 类型 | 来源 | 质量 |
+|------|------|------|------|
+| `@metrics-collector` | pattern candidate | `Packages/AOXNetworkKit/Sources/AOXNetworkKit/Monitor/MetricsCollector.swift` | confidence = 0.9 |
+
+这个样本的核心信息不是“项目有监控模块”这么宽泛，而是抽出了一条非常具体的工程事实：**BiliDili 在网络可观测性里，用 `MetricsCollector` 收集请求指标，并用 `OSAllocatedUnfairLock` 保护高频更新的共享状态。** 这不是通用 Swift 教程会自然写出的内容，而是和 `AOXNetworkKit` 内部实现强绑定的项目知识。
+
+Candidate 原文里已经能看到这种项目特异性：
+
+```markdown
+### MetricsCollector 网络指标收集与并发安全
+
+- 使用 `MetricsCollector` 收集请求路径、状态码、耗时及流量大小
+- 使用 `OSAllocatedUnfairLock` 保护指标历史记录
+- 该实现来自 `Packages/AOXNetworkKit/.../MetricsCollector.swift`
+```
+
+进入 **Channel A / Cursor Rules** 后，这条知识没有被一字不差地下发，而是被进一步抽象成全项目通用约束：
+
+```markdown
+- [swift] Use OSAllocatedUnfairLock for protecting simple, frequently accessed mutable state in concurrent contexts.
+  Do NOT use heavy locks like NSLock or serial DispatchQueues for simple integer counters or flags.
+```
+
+进入 **Channel B / Networking Patterns** 后，同一事实又被保留为更贴近网络层的模式卡片：
+
+```markdown
+### @metrics-collector
+- When: When implementing network performance monitoring or telemetry.
+- Do: Use MetricsCollector with OSAllocatedUnfairLock to record RequestMetrics and provide aggregated statistics.
+- Why: 这是项目在高频网络事件下维持低开销可观测性的具体实现。
+```
+
+如果继续看 Wiki 输出，也能看到同一主题以“模块说明”的形式出现。虽然 Wiki 不会逐条照搬 Candidate，但 `modules/aoxnetworkkit.md` 已经明确把 `MetricsCollector` 放进 AOXNetworkKit 的核心组件图和协作流程里，说明这条知识并没有在交付阶段丢失，而是被提升到了模块级说明。
+
+这个单点样本更能说明问题：**冷启动的价值不只是“提取出 98 条候选”**，而是它可以围绕一个真实类（`MetricsCollector`）抽出一条独立知识，再分别把它变成 Candidate、Cursor Pattern、Cursor Rule 和 Wiki 说明。即便当前使用的不是最强模型，仍然已经能把这种“项目内部的具体实现”稳定地转译成多通道交付内容。
+
 ## 19.9 数据洞察总结
 
 ### 效率指标（两轮对比）

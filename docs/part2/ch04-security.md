@@ -602,6 +602,8 @@ async route(entry: KnowledgeEntry): Promise<RouteResult> {
 
 ## 六层安全链路全景
 
+![AutoSnippet 6 级决策管线](/images/ch03/01-six-layer-security.png)
+
 六层按请求路径串联，每层解决一个特定维度的安全问题：
 
 ```text
