@@ -20,6 +20,7 @@ export default defineConfig({
 
     nav: [
       { text: '首页', link: '/' },
+      { text: '图解速览', link: '/visual-tour' },
       { text: '开始阅读', link: '/part1/ch01-introduction' },
       {
         text: '相关链接',
@@ -31,6 +32,7 @@ export default defineConfig({
     ],
 
     sidebar: [
+      { text: '图解速览', link: '/visual-tour' },
       {
         text: '起点与哲学',
         collapsed: false,

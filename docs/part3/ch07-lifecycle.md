@@ -131,7 +131,8 @@ const HIGH_RISK_TYPES = new Set<ProposalType>([
 
 | 提案类型 | 观察窗口 |
 |:---|:---|
-| `enhance` / `correction` | 24-48 小时 |
+| `correction` | 24 小时 |
+| `enhance` | 48 小时 |
 | `merge` / `supersede` | 72 小时 |
 | `deprecate` / `contradiction` / `reorganize` | 7 天 |
 
@@ -171,13 +172,14 @@ const HIGH_RISK_TYPES = new Set<ProposalType>([
 const TIMEOUT_MS = {
   evolving: 7 * 24 * 60 * 60 * 1000,   // 7 天
   decaying: 30 * 24 * 60 * 60 * 1000,  // 30 天
+  staging:  7 * 24 * 60 * 60 * 1000,   // 7 天（安全兜底，正常由 StagingManager 处理）
   pending:  30 * 24 * 60 * 60 * 1000,  // 30 天
 };
 
 const TIMEOUT_TARGET = {
-  evolving: 'active',     // 回退到 active
-  decaying: 'deprecated', // 自动废弃
-  pending:  'deprecated', // 30 天未审核自动废弃
+  evolving: 'active',     // 回退到 active（内容不变）
+  decaying: 'deprecated', // 长期衰退 → 废弃
+  pending:  'deprecated', // 30 天未审核 → 废弃
 };
 ```
 
@@ -379,15 +381,15 @@ decayScore = freshness × 0.3 + usage × 0.3 + quality × 0.2 + authority × 0.2
 
 **freshness（新鲜度 · 0.3 权重）**
 
-基于最后一次被使用的时间距今。90 天无使用得 0 分，7 天内使用过得满分，中间线性插值。这里的"使用"包括两种信号：`guardHit`（Guard 检查时命中该 Recipe 的规则）和 `searchHit`（搜索结果中返回了该 Recipe）。
+基于最后一次被使用的时间距今。365 天无使用得 0 分，当天使用过得满分，中间线性插值（`1 - daysSinceHit / 365`）。这里的"使用"包括两种信号：`guardHit`（Guard 检查时命中该 Recipe 的规则）和 `searchHit`（搜索结果中返回了该 Recipe）。
 
 **usage（使用率 · 0.3 权重）**
 
-不只看最近，而是统计整个生命期的累计使用量和趋势。一条被使用了 500 次的知识，即使最近 60 天没有使用，其 usage 分数仍然不会为零——这防止了季节性使用的知识（比如年度报表模块的代码规范）被误判为衰退。
+统计最近 90 天的命中次数（`hitsLast90d`），归一化为 0-1 分数：`min(1, hitsLast90d / 50)`——即 50 次以上命中得满分，0 次得 0 分。注意这里只看近期窗口而非全生命期累计：如果一条知识在最近 90 天完全没有被使用，usage 维度得分为零。这是一个刻意的设计选择——衰退检测关注的是"现在还有没有价值"，而非"历史上曾经有过多少价值"。
 
 **quality（质量 · 0.2 权重）**
 
-来自 QualityScorer 的综合评分。包括字段完整度、代码示例质量、约束三元组完整性等。低质量的知识更容易被判定为衰退——这是一个有意义的设计选择：如果一条知识本身质量就不高，又长期无人使用，它几乎可以确定是过时的。
+来自 QualityScorer v2 的综合评分。v2 采用五维度加权模型：结构完整性（completeness, 0.25）、内容深度（contentDepth, 0.30）、交付就绪度（deliveryReady, 0.20）、可操作性（actionability, 0.15）、溯源可信度（provenance, 0.10）。低质量的知识更容易被判定为衰退——这是一个有意义的设计选择：如果一条知识本身质量就不高，又长期无人使用，它几乎可以确定是过时的。
 
 **authority（权威性 · 0.2 权重）**
 

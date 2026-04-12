@@ -85,97 +85,119 @@ Agent 写完代码后，Guard 合规引擎会自动检查 diff——发现违规
 
 候选在 Dashboard（`asd ui`）中审核并批准 → 变成 **Recipe** → AI 生成代码时自动参照 → 你发现新的好写法 → 继续沉淀 → AI 越来越像团队的人。这些知识是本地 Markdown 文件，跟 git 走，不会随对话消失，也不占上下文窗口——知识库再大也不会拖慢 AI。
 
-## 核心能力总览
+## 进化架构
 
-围绕"有限答案回答无限问题"这一核心洞察，AutoSnippet 构建了完整的知识工程系统——从代码理解到知识提取、从合规检查到知识交付，每个模块都在服务同一个闭环。以下是各核心模块的速览，每个模块在后续章节中都有独立的深入解析。
+AutoSnippet 不是静态知识工具，而是一个**知识有机体**。Recipe 是它的细胞——IDE Agent 是外部驱动力，每一次交互都会触发有机体内不同器官的协同响应。
 
-### 多语言 AST 分析与项目全景
-
-基于 Tree-sitter 的 10 语言统一解析：Go · Python · Java · Kotlin · Swift · TypeScript · JavaScript · Rust · Objective-C · Dart。不只是语法树——还包括类继承关系、调用图推断（5 阶段增量分析）、设计模式检测（Singleton / Delegate / Factory / Observer）、Tarjan 耦合分析和 Kahn 拓扑分层。这些结构化数据构成项目的**全景图（Panorama）**，是所有上层智能的基础。*→ [Ch03 架构全景](../part2/ch03-architecture) · [Ch05 代码理解](../part2/ch05-ast)*
-
-### 知识的生命周期与可信任性
-
-每条知识（KnowledgeEntry）不是一个静态文本，而是一个领域实体，携带 25 维分类、质量评分、置信度推理链、源文件引用证据。六态生命周期赋予知识自主演化的能力：
-
-```text
-pending → staging → active → evolving → decaying → deprecated
+```
+                IDE Agent (Cursor / Copilot / Trae)
+                   │
+                   │ 沉淀 · 编写 · 搜索 · 偏移 · 完成 · 边界
+                   │
+  ═════════════════▼══════════════════════════════════════
+  ║              AutoSnippet 知识有机体                    ║
+  ║                                                       ║
+  ║  ┌─ Panorama (骨骼) ────────── 项目结构全貌 ──────┐   ║
+  ║  │                                                │   ║
+  ║  │    Signal (神经)  ◄────►  Governance (消化)     │   ║
+  ║  │        ↕                        ↕              │   ║
+  ║  │              ┌──────────┐                      │   ║
+  ║  │              │  Recipe  │                      │   ║
+  ║  │              │ 知识生命体│                      │   ║
+  ║  │              └──────────┘                      │   ║
+  ║  │        ↕                        ↕              │   ║
+  ║  │    Guard (免疫)    ◄────►  Tool Forge (造物)    │   ║
+  ║  │                                                │   ║
+  ║  └────────────────────────────────────────────────┘   ║
+  ║                                                       ║
+  ═════════════════════════════════════════════════════════
 ```
 
-**进化提案（Evolution Proposal）** 是安全设计的核心：Agent 不直接修改已有知识，而是附加提案（enhance / merge / supersede / correction）。低风险提案在观察期后自动执行，高风险提案（contradiction / reorganize）必须人工确认。
+### Agent 行为 × 有机体响应
 
-**源代码引用（SourceRefs）** 保证可信任性：每条 Recipe 携带项目中真实文件路径作为证据链，SourceRefReconciler 持续检查路径健康状态，git rename 自动修复，引用失活的知识会被信号系统标记并触发衰退。*→ [Ch06 KnowledgeEntry](../part3/ch06-knowledge-entry) · [Ch07 生命周期](../part3/ch07-lifecycle)*
+IDE Agent 的每个行为，都会触发有机体内不同器官的协同响应：
 
-### Guard 合规引擎
+| Agent 行为 | 有机体响应 | 参与器官 |
+|-----------|---------|---------|
+| **沉淀知识** — 提取模式并提交 | 消化系统内部消化：置信度路由 → staging 观察 → 进化或衰退，开发者保留全程干预权 | 消化 → 神经 |
+| **编写代码** — 开始写代码 | 神经系统分析意图，自动注入相关 Recipe，附带 sourceRefs 源码证据提升可信度 | 神经 → Recipe |
+| **搜索知识** — 主动搜索 | 基于当前意图 + 文件上下文精准检索，多路融合排序，按场景动态调整权重 | 神经 → Recipe |
+| **偏移意图** — 改变方向 | 神经系统记录偏移信号，感知问题，免疫系统反向检查 Recipe 是否仍然有效 | 神经 → 免疫 |
+| **完成任务** — 写完代码 | 免疫系统触发 Guard Review，挂载相关 Recipe 给 Agent 修复违规 | 免疫 → Recipe |
+| **能力边界** — 遇到无法处理的问题 | 造物系统调用 LLM 自建临时工具，vm 沙箱隔离执行，到期自动回收 | 造物 |
 
-不是静态 lint，而是一个**四层检测 + 三态输出**的免疫系统：
+### 五大器官
 
-1. **正则匹配** — 快速的一级过滤
-2. **代码级多行分析** — 跨行的模式检测
-3. **Tree-sitter AST** — 语义级的结构检查
-4. **跨文件分析** — 依赖关系级的约束验证
+**骨骼 — Panorama**
 
-每条违规输出 pass / violation / uncertain 三态。不确定的结果不会强制报错，而是通过 UncertaintyCollector 追踪，交由开发者决策。Guard 同时具备**反向验证（ReverseGuard）**能力——检测 Recipe 引用的符号是否仍然存活，发现 5 种代码漂移类型。*→ [Ch10 Guard 引擎](../part4/ch10-guard)*
+有机体的结构感知。AST + 调用图推断模块角色与分层（四信号融合，13 种角色类型），Tarjan SCC 计算耦合度，Kahn 拓扑排序推断分层，DimensionAnalyzer 生成 11 维健康雷达，输出覆盖率热力图和能力缺口报告。所有器官共享这份项目全貌。*→ [Ch03 架构全景](../part2/ch03-architecture) · [Ch05 代码理解](../part2/ch05-ast)*
 
-### Agent Runtime：ReAct 推理循环
+**消化 — Governance**
 
-内置的统一 Agent 引擎，采用 CoALA 认知架构：
+新知识进入有机体后的代谢引擎。ContradictionDetector 检测矛盾，RedundancyAnalyzer 分析冗余，DecayDetector 评估衰退（6 策略 + 4 维评分），ConfidenceRouter 数值路由（≥ 0.85 自动发布，< 0.2 拒绝）。ProposalExecutor 到期自动执行进化提案（7 种类型，差异化观察窗口）。六态生命周期：`pending → staging → active → evolving/decaying → deprecated`。*→ [Ch06 KnowledgeEntry](../part3/ch06-knowledge-entry) · [Ch07 生命周期](../part3/ch07-lifecycle)*
 
-```text
-感知（Perception）→ 工作记忆（Working Memory）→ 推理（Reasoning）→ 行动（Action）→ 反思（Reflection）
+**神经 — Signal + Intent**
+
+感知 Agent 的所有行为。IntentExtractor 提取术语、推断语言和模块、中英文同义词展开，识别 4 种场景。SignalBus 统一 12 种信号类型（guard / search / usage / lifecycle / quality / exploration / panorama / decay / forge / intent / anomaly / guard_blind_spot），HitRecorder 批量采集使用事件。当 Agent 偏移意图时，神经系统记录漂移信号，协调免疫系统反向检查。*→ [Ch12 Panorama · Signal](../part4/ch12-metabolism)*
+
+**免疫 — Guard**
+
+双向免疫系统。正向：四层检测（正则 → 代码级多行 → tree-sitter AST → 跨文件），内置 8 语言规则，三态输出（pass / violation / uncertain）。反向：ReverseGuard 验证 Recipe 引用的 API 符号是否仍存在（5 种漂移类型）。Agent 完成任务时自动触发 Review，将违规连同相关 Recipe 一起交给 Agent 修复。RuleLearner 追踪 P/R/F1 自动调优。*→ [Ch10 Guard 引擎](../part4/ch10-guard)*
+
+**造物 — Tool Forge**
+
+能力边界处的创造力。三种模式渐进——复用（0ms）→ 组合（10ms，原子工具拼装）→ 生成（~5s，LLM 写代码 → vm 沙箱验证：5s 超时 + 18 条安全规则）。临时工具 30min TTL，到期自动回收。LLM 只在锻造时参与，执行过程完全确定性。*→ [Ch13 AgentRuntime](../part5/ch13-agent-runtime) · [Ch14 正交组合](../part5/ch14-orthogonal)*
+
+### 设计哲学
+
+这些哲学不是抽象原则，而是代码中随处可见的工程决策。[Ch02](./ch02-soul) 将深入解读每一项哲学如何化为具体的代码守护点。
+
+1. **AI 编译期 + 工程运行期** — LLM 产出确定性执行物，运行期纯工程逻辑
+2. **确定性标记 + 概率性消解** — 每层做确定的事，不确定结构化上抛给 AI
+3. **正交组合 > 特化子类** — Capability × Strategy × Policy 替代 N 个子类
+4. **信号驱动 > 时间驱动** — 信号饱和触发，而非定时扫描
+5. **纵深防御** — Constitution → Gateway → Permission → SafetyPolicy → PathGuard → ConfidenceRouter
+
+## 工程能力
+
+上面是有机体本身。下面是它对外提供的工程集成能力。
+
+### Guard CLI
+
+```bash
+asd guard src/             # 检查目录
+asd guard:staged           # pre-commit 只查暂存文件
+asd guard:ci --min-score 90   # CI 质量门禁
 ```
 
-61+ 工具覆盖 AI 分析、AST 图查询、进化提案、Guard 检查、生命周期管理、知识检索、项目文件访问、系统交互等全部能力。每轮迭代最多执行 8 次工具调用，三级递进上下文压缩（summary → extract → token budget）控制窗口膨胀。内置 2-strike 错误恢复策略、空响应 rollback、熔断器感知和提交去重机制。*→ [Ch13 AgentRuntime](../part5/ch13-agent-runtime) · [Ch14 正交组合](../part5/ch14-orthogonal)*
+### 多语言 AST
 
-### 混合搜索引擎
+11 种语言 tree-sitter：Go · Python · Java · Kotlin · Swift · JS · TS · Rust · ObjC · Dart · C#。5 阶段 CallGraph，增量分析，8 种项目类型自动检测。
 
-双路统合搜索：FieldWeighted 字段加权检索 + HNSW 向量语义检索 + RRF 融合排序（k=60）。七信号加权排序（relevance / authority / recency / popularity / difficulty / contextMatch / vector）根据使用场景动态调整权重——lint 场景 relevance 优先，generate 场景 popularity 和 vector 并重，learning 场景 difficulty 最重。
+### 6 通道 IDE 交付
 
-向量系统是零外部依赖的纯 JavaScript HNSW 实现（768 维），BatchEmbedder 通过批量 API + 并发控制实现 **50 倍加速**（串行 30s → 批量 0.6s）。*→ [Ch11 混合检索](../part4/ch11-search)*
+知识变更自动交付到 IDE 可消费的格式：
 
-### 六通道知识交付
+| 通道 | 路径 | 内容 |
+|------|------|------|
+| **A** | `.cursor/rules/autosnippet-project-rules.mdc` | alwaysApply 一行式规则 |
+| **B** | `.cursor/rules/autosnippet-patterns-{topic}.mdc` | When/Do/Don't 主题规则 |
+| **C · D** | `.cursor/skills/` | Project Skills + 开发文档 |
+| **F** | `AGENTS.md` / `CLAUDE.md` / `.github/copilot-instructions.md` | Agent 指令 |
+| **Mirror** | `.qoder/` / `.trae/` | IDE 镜像 |
 
-知识不只通过 MCP 工具查询交付，还主动推送到 IDE 的原生机制中：
+*→ [Ch17 MCP 与交付](../part6/ch17-mcp-delivery)*
 
-| 通道 | 交付物 | 目标 |
-|------|--------|------|
-| **A** | alwaysApply 一行式规则 | `.cursor/rules/` |
-| **B** | When/Do/Don't 主题规则 | `.cursor/rules/` 按主题分文件 |
-| **C** | 项目技能同步 | `.cursor/skills/` |
-| **D** | 压缩的开发文档 | `.cursor/skills/autosnippet-devdocs/` |
-| **F** | Agent 指令集 | `AGENTS.md` · `CLAUDE.md` · `.github/copilot-instructions.md` |
-| **Mirror** | IDE 镜像 | `.trae/` · `.qoder/`（可选） |
+### 更多
 
-TokenBudget 控制每个通道的 token 上限，KnowledgeCompressor 按 rules / patterns / facts / documents 分类压缩，确保不超出 IDE 的上下文预算。*→ [Ch17 MCP 与交付](../part6/ch17-mcp-delivery)*
+- **Bootstrap 冷启动** — 6 阶段 · 10 维分析，一次性建立知识库 *→ [Ch09 Bootstrap](../part4/ch09-bootstrap)*
+- **知识图谱** — 14 种关联关系，查询影响路径和依赖深度
+- **语义搜索** — HNSW 向量索引 + 加权字段匹配混合检索，RRF 融合 + 7 路信号排序 *→ [Ch11 混合检索](../part4/ch11-search)*
+- **sourceRefs** — Recipe 携带源码证据，Agent 无需自行验证
+- **飞书远程** — 手机发消息，意图识别分流到 Bot 或 IDE
+- **远程仓库** — Recipe 目录转 git 子仓库，多项目共享
 
-### 信号驱动架构
-
-12 种信号类型（guard / search / usage / lifecycle / decay / quality / panorama / intent / anomaly …）通过统一的 SignalBus 同步分发（< 0.1ms per emit）。HitRecorder 批量采集使用信号，30 秒定时 flush 到 SQLite，兼顾实时性与写入性能。
-
-信号饱和触发而非定时扫描——知识的衰退、进化、质量变化都由真实使用信号驱动，而不是每天跑一遍定时任务。*→ [Ch12 Panorama · Signal](../part4/ch12-metabolism)*
-
-## 设计哲学
-
-这些哲学不是抽象原则，而是代码中随处可见的工程决策。[Ch02](./ch02-soul) 将深入解读每一项哲学如何化为具体的代码守护点，此处勾勒轮廓：
-
-### 1. AI 编译期 + 工程运行期
-
-LLM 在"编译期"产出确定性执行物（Recipe、Guard 规则、Evolution 提案），运行期纯工程逻辑——搜索、交付、合规检查不依赖 LLM。这意味着一旦知识库建立，即使没有 AI 连接，Guard、Search、Delivery 仍然正常工作。
-
-### 2. 确定性标记 + 概率性消解
-
-AST 分析做确定的事（类继承、调用图、模式检测），不确定的部分（"这个模式是否值得提取为规范"）结构化上抛给 AI。Guard 的四层检测也遵循同样的原则——正则和 AST 做确定性匹配，只有 uncertain 的结果才需要 AI 或人工介入。
-
-### 3. 正交组合 > 特化子类
-
-Agent 系统用 Capability × Strategy × Policy 三维正交组合替代 N 个特化子类。同一个 AgentRuntime 引擎，搭配不同的 Strategy（Research / Code Review / Evolution）和 Policy（验证规则集）就能处理完全不同的任务，而不需要 ResearchAgent、ReviewAgent、EvolutionAgent 三个子类。
-
-### 4. 信号驱动 > 时间驱动
-
-没有 cron job。知识衰退由真实使用信号（30 天无 guardHit / searchHit）触发，进化提案由矛盾检测信号触发，质量评分由采用率信号更新。SignalBus 的异常隔离保证消费者异常不阻断信号分发。
-
-### 5. 纵深防御
-
-六层安全链路：Constitution（YAML 角色权限）→ Gateway（4 步管线：validate → guard → route → audit）→ Permission（3-tuple RBAC）→ SafetyPolicy（Agent 行为约束）→ PathGuard（文件系统边界）→ ConfidenceRouter（置信度路由）。任何一层失败都会阻断请求，每层独立记录审计日志。
+> AI 驱动功能需 LLM API Key。支持 Google / OpenAI / Claude / DeepSeek / Ollama，自动 fallback。
 
 ## 工程规模
 

@@ -6,6 +6,9 @@ hero:
   tagline: 从 SOUL 原则到 12 万行实现 — 一个 AI 知识引擎的完整设计故事
   actions:
     - theme: brand
+      text: 图解速览
+      link: /visual-tour
+    - theme: alt
       text: 开始阅读
       link: /part1/ch01-introduction
     - theme: alt
