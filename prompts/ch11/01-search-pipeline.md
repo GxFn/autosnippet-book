@@ -1,4 +1,4 @@
-Title at top in bold Chinese: "搜索系统全景：双路召回 + 四级重排"
+Title at top in bold Chinese: "搜索系统全景：双路召回 + 三级重排"
 
 A left-to-right flow diagram showing the complete search pipeline, divided into two major phases.
 
@@ -22,27 +22,23 @@ Two lanes converge into a diamond shape labeled "RRF 融合":
   Sub-note: "只用排名不用分数 · AI 断路器打开时降级为纯 FieldWeighted"
 
 CENTER-RIGHT — "重排阶段" (Reranking Phase):
-Four vertically stacked boxes connected by downward arrows:
+Three vertically stacked boxes connected by downward arrows:
 
-Box 1 (pale purple): "Level 1: CrossEncoder AI 重排"
-  Annotation right: "· 40 candidates · LLM 评分"
-  Sub-note: "降级: Jaccard |A∩B| / |A∪B|"
-
-Box 2 (pale blue): "Level 2: CoarseRanker 五维粗排"
+Box 1 (pale blue): "Level 1: CoarseRanker 五维粗排"
   Five small pills inside: "recall 0.45", "semantic 0.3", "freshness 0.15", "popularity 0.1", "quality 0"
   Sub-note: "freshness 半衰期 180 天 · 向量不可用时按比例放大"
 
-Box 3 (pale yellow): "Level 3: MultiSignalRanker 七信号精排"
+Box 2 (pale yellow): "Level 2: MultiSignalRanker 七信号精排"
   Seven small pills in two rows:
     Row 1: "relevance", "authority", "recency", "popularity"
     Row 2: "difficulty", "contextMatch", "vector"
   Annotation on right: "场景权重: lint / generate / learning / search"
 
-Box 4 (pale pink): "Level 4: ContextBoost 会话加成"
+Box 3 (pale pink): "Level 3: ContextBoost 会话加成"
   Annotation: "sessionKeywords 重叠 max +20% · 语言匹配 +10%"
   Sub-note: "context 模式不缓存"
 
 RIGHT SIDE — "输出":
-An arrow from the bottom of Level 4 to a result list showing "Top-K Results" with 5 result cards ranked ①②③④⑤.
+An arrow from the bottom of Level 3 to a result list showing "Top-K Results" with 5 result cards ranked ①②③④⑤.
 
 BOTTOM annotation: "AI 不可用时自动降级 · 零外部依赖 · context 模式不缓存（个性化结果）"

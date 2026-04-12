@@ -456,7 +456,7 @@ McpServer._handleToolCall('autosnippet_search', {query, mode})
   → _gatewayGate()：搜索是只读操作，不在 TOOL_GATEWAY_MAP 中，直接放行
   → _resolveHandler()：映射到 consolidated.consolidatedSearch()
   → consolidatedSearch()：mode='auto' 路由到 searchHandlers.search()
-  → SearchEngine：三路召回 + RRF 融合 + 四级重排
+  → SearchEngine：三路召回 + RRF 融合 + 三级重排
   → 返回 Top-5 Recipe，序列化为 JSON
 ← Agent 获得精准的 Cookie 管理模式描述
 ```
