@@ -351,7 +351,7 @@ Embedding 服务还有断路器保护：连续 3 次失败后打开断路器，6
 
 **上下文富化**（`ContextualEnricher`）是一个基于 Anthropic "Contextual Retrieval" 论文的可选优化。它对每个 chunk 生成 50–100 token 的上下文描述前缀，让 chunk 在被 embedding 时保留文档层面的语义。论文数据显示，配合 reranking 可以将检索失败率降低 35–67%。
 
-为了控制成本，富化使用轻量模型（Haiku/Gemini Flash），并利用 **Prompt Caching**——同一文档的多个 chunk 共享 system prompt 缓存，后续 chunk 的 Token 成本降至首个的 10%。
+为了控制成本，富化使用轻量模型（Haiku 4.5/Gemini Flash），并利用 **Prompt Caching**——同一文档的多个 chunk 共享 system prompt 缓存，后续 chunk 的 Token 成本降至首个的 10%。
 
 ## 运行时行为
 

@@ -383,7 +383,7 @@ const BUDGET_PROFILES = {
 
 **user** profile（Chat 场景）：PersistentMemory 占 60%——对话中长期记忆最重要，SessionStore 为 0（无维度扫描上下文）。**analyst** profile（分析阶段）：ActiveContext 占 45%——当前搜索的工具结果最重要；SessionStore 占 35%——跨维度发现很有价值。**producer** profile（生产阶段）：SessionStore 占 55%——需要大量前序分析摘要来生成高质量候选。
 
-总预算默认 4000 token，但也可以从模型上下文窗口动态计算——`configure({ totalContextBudget })` 按 12.5% 比例分配记忆预算（例如 128K 窗口 → 16000 token 记忆预算）。
+总预算默认 4000 token，但也可以从模型上下文窗口动态计算——`configure({ totalContextBudget })` 按 12.5% 比例分配记忆预算（例如 1M 窗口 → 128000 token 记忆预算）。
 
 记忆注入分为**静态 + 动态**两阶段：
 
@@ -571,7 +571,7 @@ L3（> 95% 预算）：只保留系统提示 + 最后 1 轮 + 提交记录
 
 **设计不变量**：`messages[0]` 永远是原始用户提示（不可变），`assistant(toolCalls)` + tool results 是原子单元（不可拆分）。这两条规则确保 LLM 在任何压缩级别下都能看到最初的任务描述和最近的完整工具调用结果。
 
-**模型感知的 token 预算**：不同 AI 模型的上下文窗口不同——Claude Sonnet 200K、GPT-4o 128K、Gemini 1M。ContextWindow 通过模型名正则匹配自动设定预算上限，避免为每个模型手工配置。
+**模型感知的 token 预算**：不同 AI 模型的上下文窗口不同——Claude Opus/Sonnet 4.6 1M、GPT-5.4 1M、Gemini 3.1 Pro 1M、Claude Haiku 200K、GPT-5.4-mini 400K。ContextWindow 通过模型名正则匹配自动设定预算上限，避免为每个模型手工配置。
 
 ## 运行时行为
 

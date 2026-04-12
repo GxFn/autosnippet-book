@@ -46,7 +46,7 @@ asd ui        # 启动后台服务，IDE 和 MCP 工具依赖此服务运行
 
 > **首次使用：** 需在 IDE 的 MCP 设置中手动开启 `autosnippet` 服务。
 
-> **提示：** IDE Agent 使用的模型越强，效果越好。推荐选择 Claude Opus 4 / Sonnet 4、GPT-5 或 Gemini 3 Pro。
+> **提示：** IDE Agent 使用的模型越强，效果越好。推荐选择 Claude Opus 4.6 / Sonnet 4.6、GPT-5.4 或 Gemini 3.1 Pro。
 
 ### 冷启动：建立项目知识库
 
