@@ -89,17 +89,64 @@ export const CapabilityRegistry = {
 
 #### 六种内置 Capability
 
-**Conversation** — 对话与知识检索。工具集包括 `search_knowledge`、`search_recipes`、`get_recipe_detail`、`get_related_recipes`、`semantic_search_code`、`submit_knowledge`、`knowledge_overview`、`get_project_stats`（8 个）。注入 SOUL.md 人格提示词（约 40–150 token），启用记忆上下文缓存。适用于所有需要与用户多轮交互的场景。
+##### Conversation — 对话与知识检索
 
-**CodeAnalysis** — 代码结构理解。工具集包括 `get_project_overview`、`get_class_hierarchy`、`get_class_info`、`get_protocol_info`、`get_method_overrides`、`get_category_map`、`search_project_code`、`read_project_file`、`list_project_structure`、`get_file_summary`、`semantic_search_code`、`query_code_graph`、`get_previous_analysis`、`note_finding`、`get_previous_evidence`（15 个）。注入批量搜索策略提示词，自动收集证据链（文件路径 + 代码片段）。适用于所有需要“读懂代码”的场景——从类层次分析到设计模式检测。
+注入 SOUL.md 人格提示词（约 40–150 token），启用记忆上下文缓存。适用于所有需要与用户多轮交互的场景。
 
-**KnowledgeProduction** — 知识候选生产。工具集包括 `submit_knowledge`、`submit_with_check` 和 `read_project_file`。`submit_knowledge` 内部集成了 `UnifiedValidator` 完整校验——字段约束、去重检查、质量评分一步到位。适用于 insight 分析流水线的"产出"阶段。
+| 分类 | 工具 |
+|:---|:---|
+| 知识检索 | `search_knowledge` · `search_recipes` · `get_recipe_detail` · `get_related_recipes` |
+| 代码语义 | `semantic_search_code` |
+| 知识写入 | `submit_knowledge` |
+| 全局视图 | `knowledge_overview` · `get_project_stats` |
 
-**ScanProduction** — 扫描模式的轻量产出。与 KnowledgeProduction 共享相同的 schema，但使用 `collect_scan_recipe` 工具——收集到运行时而非持久化到数据库。适用于 Bootstrap 冷启动的批量扫描阶段，避免在分析过程中直接写入数据库。
+##### CodeAnalysis — 代码结构理解
 
-**SystemInteraction** — 终端执行与文件操作。核心副作用工具：`run_safe_command`、`write_project_file`、`get_environment_info`、`read_project_file`，另包含 `search_project_code`、`list_project_structure`、`get_project_overview`、`get_file_summary` 等只读探索工具（8 个）。**三层安全防护**：工具级黑名单（危险命令正则匹配）、SafetyPolicy 验证（白名单路径和发送者）、运行时检查（PathGuard 文件系统沙箱）。这是唯一一个强制绑定 SafetyPolicy 的 Capability。
+注入批量搜索策略提示词，自动收集证据链（文件路径 + 代码片段）。适用于所有需要"读懂代码"的场景——从类层次分析到设计模式检测。
 
-**EvolutionAnalysis** — 知识进化决策。工具集包括 `read_project_file`、`search_project_code`、`propose_evolution`、`confirm_deprecation`、`skip_evolution`。驱动 Recipe 的进化流程——分析源代码变化、提出进化提案、确认废弃或跳过。
+| 分类 | 工具 |
+|:---|:---|
+| 结构探索 | `get_project_overview` · `get_class_hierarchy` · `get_class_info` · `get_protocol_info` |
+| 关系分析 | `get_method_overrides` · `get_category_map` · `query_code_graph` |
+| 代码搜索 | `search_project_code` · `semantic_search_code` · `read_project_file` |
+| 项目导航 | `list_project_structure` · `get_file_summary` |
+| 证据管理 | `get_previous_analysis` · `get_previous_evidence` · `note_finding` |
+
+##### KnowledgeProduction — 知识候选生产
+
+适用于 insight 分析流水线的"产出"阶段。`submit_knowledge` 内部集成了 `UnifiedValidator` 完整校验——字段约束、去重检查、质量评分一步到位。
+
+| 分类 | 工具 |
+|:---|:---|
+| 知识提交 | `submit_knowledge` · `submit_with_check` |
+| 源码参考 | `read_project_file` |
+
+##### ScanProduction — 扫描模式的轻量产出
+
+与 KnowledgeProduction 共享相同的 schema，但使用 `collect_scan_recipe` 工具——收集到运行时而非持久化到数据库。适用于 Bootstrap 冷启动的批量扫描阶段，避免在分析过程中直接写入数据库。
+
+| 分类 | 工具 |
+|:---|:---|
+| 批量收集 | `collect_scan_recipe` |
+
+##### SystemInteraction — 终端执行与文件操作
+
+**三层安全防护**：工具级黑名单（危险命令正则匹配）、SafetyPolicy 验证（白名单路径和发送者）、运行时检查（PathGuard 文件系统沙箱）。这是唯一一个强制绑定 SafetyPolicy 的 Capability。
+
+| 分类 | 工具 |
+|:---|:---|
+| 副作用操作 | `run_safe_command` · `write_project_file` |
+| 环境信息 | `get_environment_info` |
+| 只读探索 | `read_project_file` · `search_project_code` · `list_project_structure` · `get_project_overview` · `get_file_summary` |
+
+##### EvolutionAnalysis — 知识进化决策
+
+驱动 Recipe 的进化流程——分析源代码变化、提出进化提案、确认废弃或跳过。
+
+| 分类 | 工具 |
+|:---|:---|
+| 源码分析 | `read_project_file` · `search_project_code` |
+| 进化决策 | `propose_evolution` · `confirm_deprecation` · `skip_evolution` |
 
 #### Capability 的正交性
 
