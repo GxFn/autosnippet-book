@@ -12,7 +12,13 @@
     "type": "git",
     "url": "git+https://github.com/GxFn/autosnippet-book.git"
   },
-  "keywords": ["autosnippet", "vitepress", "documentation", "knowledge-engine", "architecture"],
+  "keywords": [
+    "autosnippet",
+    "vitepress",
+    "documentation",
+    "knowledge-engine",
+    "architecture"
+  ],
   "author": "GaoXuefeng <https://github.com/GxFn>",
   "license": "MIT",
   "bugs": {
@@ -20,6 +26,7 @@
   },
   "homepage": "https://github.com/GxFn/autosnippet-book#readme",
   "devDependencies": {
+    "markdown-it-mathjax3": "^4.3.2",
     "vitepress": "^1.6.4"
   }
 }
