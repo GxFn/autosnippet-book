@@ -383,7 +383,27 @@ const BUDGET_PROFILES = {
 
 **user** profile（Chat 场景）：PersistentMemory 占 60%——对话中长期记忆最重要，SessionStore 为 0（无维度扫描上下文）。**analyst** profile（分析阶段）：ActiveContext 占 45%——当前搜索的工具结果最重要；SessionStore 占 35%——跨维度发现很有价值。**producer** profile（生产阶段）：SessionStore 占 55%——需要大量前序分析摘要来生成高质量候选。
 
-`injectStaticMemory()` 方法在每轮 ReAct 循环前被调用，按预算从三层记忆中提取最相关的片段，拼接成一段提示词注入系统消息。这确保 Agent 在每一轮都有"记忆加持"——既知道上一步做了什么（ActiveContext），也知道之前发现了什么（SessionStore），还知道长期积累的模式（PersistentMemory）。
+总预算默认 4000 token，但也可以从模型上下文窗口动态计算——`configure({ totalContextBudget })` 按 12.5% 比例分配记忆预算（例如 128K 窗口 → 16000 token 记忆预算）。
+
+记忆注入分为**静态 + 动态**两阶段：
+
+1. **`buildStaticMemoryPrompt()`**——Pipeline `execute()` 入口调用一次。按顺序组装 PersistentMemory → SessionStore → ConversationLog，每层有独立 token 预算。**未用完的预算累积为 surplus**。
+2. **`buildDynamicMemoryPrompt()`**——每轮 ReAct 迭代调用。ActiveContext 的实际预算 = 自身分配 + 静态阶段的剩余 surplus。
+
+这个**弹性预算再分配**机制很关键：如果 PersistentMemory 只有 3 条记忆、远没用完 60% 预算，多余 token 自动流向 ActiveContext，让工作记忆有更多空间装载当前搜索结果。
+
+```typescript
+// 静态阶段: 每层实际使用 < 预算 → 剩余累积
+surplus += Math.max(0, pmBudget - used);
+// 动态阶段: ActiveContext 获得自身预算 + 全部 surplus
+const acBudget = allocation.activeContext + surplus;
+```
+
+MemoryCoordinator 还提供 `getMessageBudget()` 来计算对话消息的可用空间：
+
+$$\text{messageBudget} = \text{totalContext} - \text{memoryBudget} - 2000_{\text{system}} - 3000_{\text{tools}} - 3000_{\text{safety}}$$
+
+token 估算使用 CJK 感知的粗略算法——中文字符按 1/2 计，其余按 1/4 计——不依赖外部 tokenizer 库。
 
 ## 核心实现
 
