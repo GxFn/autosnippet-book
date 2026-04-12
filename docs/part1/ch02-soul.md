@@ -104,7 +104,7 @@ async embedAll(items: Array<{ id: string; content: string }>) {
 }
 ```
 
-`BatchEmbedder` 在每次调用时检查 AI Provider 是否存在且有效。没有 AI 时，向量嵌入返回空结果，搜索引擎自动降级到纯 BM25 关键词检索——功能受限但结果可靠，而不是用随机向量假装语义相关性。
+`BatchEmbedder` 在每次调用时检查 AI Provider 是否存在且有效。没有 AI 时，向量嵌入返回空结果，搜索引擎自动降级到纯 FieldWeighted 字段加权检索——功能受限但结果可靠，而不是用随机向量假装语义相关性。
 
 这条约束贯穿整个系统：Search 引擎在无 AI 时跳过语义 rerank，Agent 在无 AI Provider 时拒绝启动推理循环。**宁可少做，不可假做。**
 
@@ -157,16 +157,13 @@ const BUILT_IN_RULES = {
 ```typescript
 // lib/service/search/SearchEngine.ts
 async search(query: string, options: SearchOptions = {}) {
-  // 1. Keyword recall — 纯工程，无 AI
-  const bm25Results = this.#coarseRanker.rank(query);
+  // 1. FieldWeighted recall — 纯工程，无 AI
+  const weightedResults = this.scorer.search(query);
 
-  // 2. FieldWeighted scoring — 纯工程
-  const scoredResults = this.scorer.score(bm25Results);
+  // 2. Signal reinforcement — 纯工程（usage/guard/quality 信号）
+  const signalBoosted = this._multiSignalRanker.rank(weightedResults);
 
-  // 3. Signal reinforcement — 纯工程（usage/guard/quality 信号）
-  const signalBoosted = this._multiSignalRanker.rank(scoredResults);
-
-  // 4. Semantic rerank — 可选 LLM，skipIfNoProvider
+  // 3. Semantic rerank — 可选 LLM，skipIfNoProvider
   if (this.aiProvider && options.useSemanticRanking) {
     return await this._semanticRerank(signalBoosted);
   }
@@ -175,7 +172,7 @@ async search(query: string, options: SearchOptions = {}) {
 }
 ```
 
-步骤 1-3（BM25 召回 → 字段加权 → 信号增强）是 O(n log k) 的确定性算法。语义 rerank 是第 4 步的可选增强——有 AI 时更精准，没有 AI 时仍然返回高质量结果。
+步骤 1–2（FieldWeighted 召回 → 信号增强）是 O(n log k) 的确定性算法。语义 rerank 是第 3 步的可选增强——有 AI 时更精准，没有 AI 时仍然返回高质量结果。
 
 ### 为什么这很重要
 

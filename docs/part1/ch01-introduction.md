@@ -114,7 +114,7 @@ pending → staging → active → evolving → decaying → deprecated
 
 ### 混合搜索引擎
 
-三模式统合搜索：BM25 关键词检索 + HNSW 向量语义检索 + RRF 融合排序（k=60）。六信号加权排序（relevance / authority / recency / popularity / difficulty / contextMatch）根据使用场景动态调整权重——lint 场景 relevance 优先，generate 场景 popularity 和 vector 并重，learning 场景 difficulty 最重。
+双路统合搜索：FieldWeighted 字段加权检索 + HNSW 向量语义检索 + RRF 融合排序（k=60）。七信号加权排序（relevance / authority / recency / popularity / difficulty / contextMatch / vector）根据使用场景动态调整权重——lint 场景 relevance 优先，generate 场景 popularity 和 vector 并重，learning 场景 difficulty 最重。
 
 向量系统是零外部依赖的纯 JavaScript HNSW 实现（768 维），BatchEmbedder 通过批量 API + 并发控制实现 **50 倍加速**（串行 30s → 批量 0.6s）。*→ [Ch11 混合检索](../part4/ch11-search)*
 

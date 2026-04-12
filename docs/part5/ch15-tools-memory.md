@@ -38,7 +38,7 @@ interface ToolDefinition {
 | 子模块 | 工具数 | 职责 |
 |:---|:---|:---|
 | **ast-graph** | 11 | 类层次、协议信息、方法覆写、调用图、代码图谱查询 |
-| **lifecycle** | 7 | 候选提交、审核、发布、废弃、质量评分 |
+| **lifecycle** | 10 | 候选提交、审核、发布、废弃、质量评分、候选校验、反馈统计 |
 | **infrastructure** | 7 | Bootstrap、技能管理、影响分析、审计日志 |
 | **query** | 6 | Recipe/Candidate 搜索、统计、知识检索 |
 | **composite** | 6 | 多工具组合操作（analyze_code、submit_with_check 等） |
@@ -46,7 +46,6 @@ interface ToolDefinition {
 | **guard** | 4 | Guard 规则列表、合规检查、建议、违规查询 |
 | **system-interaction** | 3 | 终端命令执行、文件写入、环境信息 |
 | **evolution-tools** | 3 | 进化提案、废弃确认、跳过决策 |
-| **quality** | 3 | 质量评分、候选校验、反馈统计 |
 | **knowledge-graph** | 2 | 去重检查、知识关系边添加 |
 | **ai-analysis** | 2 | 候选富化、Bootstrap 候选精炼 |
 | **scan-recipe** | 1 | 扫描模式的运行时候选收集 |
@@ -90,20 +89,19 @@ interface ToolMiddleware {
 }
 ```
 
-8 个内置中间件按顺序执行——`before` 钩子在工具执行前运行，`after` 钩子在执行后运行：
+7 个内置中间件按顺序执行——`before` 钩子在工具执行前运行，`after` 钩子在执行后运行（EventBusPublisher 和 ProgressEmitter 不在默认管道中，由 `#processToolCalls` 直接处理）：
 
 | 序号 | 中间件 | 阶段 | 职责 |
 |:---|:---|:---|:---|
-| 1 | **EventBusPublisher** | before + after | 向 AgentEventBus 发布工具调用事件 |
-| 2 | **ProgressEmitter** | after | 触发 `onProgress` 回调（Dashboard 实时更新） |
-| 3 | **SafetyGate** | before | SafetyPolicy 拦截：检查命令黑名单和文件路径白名单 |
-| 4 | **CacheCheck** | before | MemoryCoordinator 缓存命中检查——命中则跳过执行 |
-| 5 | **ObservationRecord** | after | 向 ActiveContext 的 ObservationLog 记录调用结果 |
-| 6 | **TrackerSignal** | after | 更新 ExplorationTracker 的探索指标（uniqueFiles、searchRounds 等） |
-| 7 | **TraceRecord** | after | 向 ActiveContext 的推理链压入工具调用 + 结果 |
-| 8 | **SubmitDedup** | before | 知识提交去重——检查 `submittedTitles` / `submittedPatterns` 集合 |
+| 1 | **AllowlistGate** | before | 拒绝不在当前 Capability 允许列表中的工具（防御 LLM 幻觉工具） |
+| 2 | **SafetyGate** | before | SafetyPolicy 拦截：检查命令黑名单和文件路径白名单 |
+| 3 | **CacheCheck** | before | MemoryCoordinator 缓存命中检查——命中则跳过执行 |
+| 4 | **ObservationRecord** | after | 向 ActiveContext 的 ObservationLog 记录调用结果 |
+| 5 | **TrackerSignal** | after | 更新 ExplorationTracker 的探索指标（uniqueFiles、searchRounds 等） |
+| 6 | **TraceRecord** | after | 向 ActiveContext 的推理链压入工具调用 + 结果 |
+| 7 | **SubmitDedup** | after | 知识提交去重——检查 `submittedTitles` / `submittedPatterns` 集合 |
 
-`before` 钩子可以返回 `{ blocked: true, reason }` 来拦截执行。SafetyGate 拦截危险命令（如 `rm -rf /`），CacheCheck 避免重复执行同一个查询，SubmitDedup 防止 Agent 重复提交同名知识候选。
+`before` 钩子可以返回 `{ blocked: true, reason }` 来拦截执行。AllowlistGate 拦截未授权工具，SafetyGate 拦截危险命令（如 `rm -rf /`），CacheCheck 避免重复执行同一个查询。SubmitDedup 在执行后检查提交结果是否重复，并记录去重信息。
 
 中间件的执行顺序很重要——SafetyGate 必须在 CacheCheck 之前（先确认安全再查缓存），TraceRecord 必须在 ObservationRecord 之后（先记录观察再压入推理链）。
 
@@ -237,8 +235,8 @@ AutoSnippet 的记忆系统借鉴了 **CoALA** 认知架构和 **Generative Agen
 
 | 层级 | 类 | 容量 | 生命周期 | 用途 |
 |:---|:---|:---|:---|:---|
-| **工作记忆** | ActiveContext | ~6000 token | 单轮迭代 | 当前搜索结果、文件内容、中间推理 |
-| **会话记忆** | SessionStore | ~4000 token | 一次 Bootstrap 会话 | 跨维度发现、阶段反思、工具结果缓存 |
+| **工作记忆** | ActiveContext | 按 profile 动态分配 | 单轮迭代 | 当前搜索结果、文件内容、中间推理 |
+| **会话记忆** | SessionStore | 按 profile 动态分配 | 一次 Bootstrap 会话 | 跨维度发现、阶段反思、工具结果缓存 |
 | **持久记忆** | PersistentMemory | ≤500 条 | 跨会话（30 天归档，90 天遗忘） | 模块分析结果、用户偏好、项目洞察 |
 
 `MemoryCoordinator` 横跨三层，负责 token 预算分配和统一读写调度。
@@ -288,8 +286,9 @@ interface Finding {
 }
 
 class SessionStore {
-  recordFinding(finding: Finding): void
-  getDimensionReports(): DimensionReportInput[]
+  addEvidence(filePath: string, evidence: Evidence): void
+  getDimensionReport(dimId: string): DimensionReport
+  getCompletedDimensions(): string[]
   getDistilledForProducer(dimId: string): DistilledContext
   buildContextForDimension(dimId: string): string
 }
@@ -370,20 +369,19 @@ interface ConsolidateStats {
 
 `MemoryCoordinator` 是三层记忆的唯一入口——所有记忆操作（读、写、检索、整合）都通过它路由到正确的层级。
 
-最关键的职责是 **token 预算分配**。上下文窗口的 token 有限——不可能把三层记忆全部注入。MemoryCoordinator 按比例分配：
+最关键的职责是 **token 预算分配**。上下文窗口的 token 有限——不可能把三层记忆全部注入。MemoryCoordinator 按**角色 profile** 动态分配预算（默认总预算 4000 token）：
 
 ```typescript
 // lib/agent/memory/MemoryCoordinator.ts
-interface BudgetProfile {
-  activeContext:    number;  // 6000 token（40%）
-  sessionStore:    number;  // 4000 token（27%）
-  persistentMemory: number; // 3000 token（20%）
-  conversationLog: number;  // 1500 token（10%）
-  // 剩余 3% 留给格式化开销
-}
+// 三种 profile，按 Agent 角色选择
+const BUDGET_PROFILES = {
+  user:     { activeContext: 0.20, sessionStore: 0,    persistentMemory: 0.60, conversationLog: 0.20 },
+  analyst:  { activeContext: 0.45, sessionStore: 0.35, persistentMemory: 0.15, conversationLog: 0.05 },
+  producer: { activeContext: 0.25, sessionStore: 0.55, persistentMemory: 0.15, conversationLog: 0.05 },
+};
 ```
 
-ActiveContext 分到最多的预算（40%）——当前任务的即时状态最重要。PersistentMemory 只有 20%——长期记忆是背景知识，不需要占太多前台空间。
+**user** profile（Chat 场景）：PersistentMemory 占 60%——对话中长期记忆最重要，SessionStore 为 0（无维度扫描上下文）。**analyst** profile（分析阶段）：ActiveContext 占 45%——当前搜索的工具结果最重要；SessionStore 占 35%——跨维度发现很有价值。**producer** profile（生产阶段）：SessionStore 占 55%——需要大量前序分析摘要来生成高质量候选。
 
 `injectStaticMemory()` 方法在每轮 ReAct 循环前被调用，按预算从三层记忆中提取最相关的片段，拼接成一段提示词注入系统消息。这确保 Agent 在每一轮都有"记忆加持"——既知道上一步做了什么（ActiveContext），也知道之前发现了什么（SessionStore），还知道长期积累的模式（PersistentMemory）。
 
@@ -488,7 +486,7 @@ SUMMARIZE 阶段设为 `none` 是关键——防止 Agent 在总结阶段"手痒
 | 优先级 | 类型 | 触发条件 | 引导内容 |
 |:---|:---|:---|:---|
 | 1（最高） | **force_exit** | 迭代耗尽 | "请总结你的发现并结束" |
-| 2 | **convergence** | 连续 3+ 轮无新信息 | "信息已饱和，考虑转入下一阶段" |
+| 2 | **convergence** | 连续 3+ 轮无新信息且已探索 ≥ 10 轮 | "信息已饱和，考虑转入下一阶段" |
 | 3 | **budget_warning** | 已消耗 75% 迭代预算 | "预算剩余 25%，优先完成核心任务" |
 | 4 | **reflection** | 每 5 轮 或反思过时 | "回顾已有发现，检查是否遗漏维度" |
 | 5 | **planning** | PlanTracker 触发 | "根据计划执行下一步" |
@@ -500,6 +498,8 @@ interface Nudge {
   text: string;  // 注入到系统消息的引导文本
 }
 ```
+
+> **注意**：`planning` 类型的 Nudge 由 `PlanTracker`（而非 NudgeGenerator）负责触发和生成文本。NudgeGenerator 只是统一的输出接口。
 
 **convergence** Nudge 的效果最显著。没有它时，Agent 经常在第 10-15 轮陷入"搜索 X → 没新结果 → 换个词搜 X → 还是没新结果"的死循环。有了 convergence Nudge，Agent 被告知"信息已饱和"，从而转入 PRODUCE 或 SUMMARIZE 阶段——平均节省 3-5 轮无效迭代。
 
@@ -636,7 +636,7 @@ LangChain 有成熟的 Tool 抽象——`StructuredTool`、`DynamicTool`、`Tool
 
 1. **DI 深度集成**。AutoSnippet 的每个工具 handler 通过 `context.container` 访问 `ServiceContainer` 依赖注入——KnowledgeService、GuardService、AstService 等服务按需获取。LangChain Tool 有自己的初始化模型（`_call` 方法），与 ServiceContainer 的生命周期不兼容。
 2. **参数归一化**。20+ 别名映射 + snake_case → camelCase 自动转换是 AutoSnippet 特有的需求——不同 AI 模型的参数命名差异在 LangChain 层面不被处理。
-3. **中间件链**。LangChain Tool 的执行是"调一下就完了"，没有 before/after 中间件。AutoSnippet 需要 SafetyGate、CacheCheck、SubmitDedup、TrackerSignal 等 8 层中间件——这些横切关注点用 LangChain 实现需要大量包装代码。
+3. **中间件链**。LangChain Tool 的执行是"调一下就完了"，没有 before/after 中间件。AutoSnippet 需要 AllowlistGate、SafetyGate、CacheCheck、SubmitDedup、TrackerSignal 等 7 层中间件——这些横切关注点用 LangChain 实现需要大量包装代码。
 
 总成本：ToolRegistry 约 300 行 + ToolExecutionPipeline 约 400 行 = 700 行自建代码，换来与 DI 系统的无缝集成和 8 层安全/缓存/追踪中间件。
 
@@ -663,7 +663,7 @@ Generate 模式让 LLM 生成并执行代码——这是潜在的安全风险。
 
 工具体系和记忆系统是 Agent 的两个互补支柱：工具让 Agent 能与世界交互，记忆让 Agent 能从交互中学习。
 
-工具层面，ToolRegistry 的注册协议 + Capability 白名单过滤解决了"60 个工具如何有序暴露"的问题。ToolExecutionPipeline 的 8 层中间件链解决了"安全、缓存、追踪如何横切执行"的问题。ToolForge 的三级瀑布（Reuse → Compose → Generate）解决了"预定义工具不够用怎么办"的问题。
+工具层面，ToolRegistry 的注册协议 + Capability 白名单过滤解决了"60 个工具如何有序暴露"的问题。ToolExecutionPipeline 的 7 层中间件链解决了"安全、缓存、追踪如何横切执行"的问题。ToolForge 的三级瀑布（Reuse → Compose → Generate）解决了"预定义工具不够用怎么办"的问题。
 
 记忆层面，三层架构（ActiveContext → SessionStore → PersistentMemory）覆盖了从秒级到月级的时间尺度。MemoryRetriever 的三维评分（recency × importance × relevance）确保最有价值的记忆被优先召回。MemoryConsolidator 的冲突消解和相似度整合确保记忆不会无限膨胀。MemoryCoordinator 的 token 预算分配确保三层记忆在有限的上下文窗口中合理共存。
 

@@ -657,7 +657,7 @@ async detectAll(projectRoot) {
 |-----------|---------|-----------|
 | `NodeDiscoverer` | package.json, tsconfig.json | 0.9 - 0.95 |
 | `JvmDiscoverer` | build.gradle(.kts), pom.xml | 0.85 - 0.95 |
-| `SwiftDiscoverer` | Package.swift, *.xcodeproj | 0.9 - 0.95 |
+| `SpmDiscoverer` | Package.swift, *.xcodeproj | 0.9 - 0.95 |
 | `PythonDiscoverer` | setup.py, pyproject.toml, requirements.txt | 0.85 - 0.9 |
 | `GoDiscoverer` | go.mod | 0.9 |
 | `RustDiscoverer` | Cargo.toml | 0.9 |

@@ -19,7 +19,7 @@
 | 参数 | 类型 | 必填 | 默认值 | 说明 |
 |:---|:---|:---|:---|:---|
 | `query` | string | ✅ | — | 搜索关键词或自然语言描述 |
-| `mode` | enum | — | `"auto"` | auto / keyword / bm25 / semantic / context |
+| `mode` | enum | — | `"auto"` | auto / keyword / weighted / semantic / context |
 | `kind` | enum | — | `"all"` | all / rule / pattern / fact |
 | `limit` | int | — | `10` | 返回数量（1-100） |
 | `language` | string | — | — | 按编程语言过滤 |

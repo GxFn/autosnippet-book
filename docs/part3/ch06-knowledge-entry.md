@@ -166,18 +166,17 @@ quality: Quality;        // 质量评分（completeness · adaptation · documen
 stats: Stats;            // 使用统计（views · adoptions · guardHits · searchHits）
 ```
 
-每个值对象都是不可变的——修改产生新实例：
+`Stats` 使用**可变流式 API**——`increment()` 直接修改当前实例并返回 `this`，支持链式调用：
 
 ```typescript
 // lib/domain/knowledge/values/Stats.ts
-increment(counter: string, delta: number = 1): Stats {
-  const props = this.toJSON();
-  props[counter] = (props[counter] || 0) + delta;
-  return Stats.from(props); // 返回新实例
+increment(counter: StatsCounter, delta = 1): Stats {
+  this[counter] += delta;
+  return this;
 }
 ```
 
-这种设计保证了 KnowledgeEntry 的状态变更是显式的、可追溯的。你不会在某个角落悄悄修改了 `stats.guardHits` 而不经过 `Stats.from()` 的构造验证。
+这种设计让高频统计场景（Guard 命中、搜索命中）避免了频繁创建新对象的 GC 压力，同时通过返回 `this` 保持链式调用的便利性。
 
 ## 架构与数据流
 
