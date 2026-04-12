@@ -31,6 +31,55 @@ Panorama 的第一步是**发现模块**。`ModuleDiscoverer` 用两种策略识
 
 **策略 2（降级）**：如果模块存在但文件列表为空，从文件系统和数据库路径中补全。对于 SPM（Swift Package Manager）项目，从 `Package.swift` 的 target 声明中提取模块定义。
 
+### CustomConfigDiscoverer — 构建系统指纹识别
+
+标准的包管理器（npm、SPM、Gradle）有统一的项目描述文件，解析它们就能发现模块。但很多真实项目使用**非标准构建系统**——百度的 EasyBox、快手的 KSComponent、美团的 MTComponent、Tuist、Bazel、Buck2 等。这些系统有各自的项目描述 DSL，`ModuleDiscoverer` 无法直接识别。
+
+`CustomConfigDiscoverer` 通过两级指纹匹配解决这个问题：
+
+**Tier 1 — 已知系统指纹（置信度 0.70–0.85）**
+
+系统内置了 16 种构建系统的指纹特征——标记文件（marker files）、反标记文件（排斥条件）和模块规格文件模式：
+
+| 类别 | 构建系统 | 标记文件 | 置信度 |
+|:---|:---|:---|:---|
+| Starlark | Bazel, Buck2 | `MODULE.bazel` / `BUCK` | 0.85 |
+| iOS 生态 | EasyBox, Tuist, KSComponent, MTComponent, XcodeGen | `Boxfile` / `Tuist/Config.swift` / 各自配置文件 | 0.75–0.80 |
+| Monorepo | Melos (Flutter), Nx | `melos.yaml` / `nx.json` | 0.80–0.82 |
+| Hybrid | Flutter Add-to-App, React Native Hybrid, KMP | 各自配置组合 | 0.78 |
+| 原生构建 | CMake, Gradle Convention Plugins | `CMakeLists.txt` / `buildSrc/` | 0.75–0.80 |
+
+每种系统有 `markerStrategy`（`'all'` / `'any'` / `'ordered'`）控制标记文件的匹配逻辑。`antiMarkers` 排除误匹配——例如 CMake 的检测会排除 Bazel 和 Pants 项目（它们可能包含 `CMakeLists.txt` 但不以 CMake 为主构建系统）。
+
+**Tier 2 — 启发式目录模式（置信度 0.50–0.65）**
+
+没有命中已知系统时，检查项目目录的结构特征：
+
+| 信号 | 置信度加成 |
+|:---|:---|
+| 存在 `Local?Modules?/` 或 `Packages/` 目录 | +0.10 ~ +0.15 |
+| 存在自定义 DSL 文件（`[A-Z]\w+file`） | +0.20 |
+| 存在 Spec 文件（`.\w+spec`） | +0.20 |
+| 存在 `.xcodeproj` | +0.05 |
+
+**7 种多语言 DSL 解析器**
+
+识别构建系统后，需要从其配置文件中提取模块信息。7 种解析器覆盖了主流的 DSL 格式：
+
+| 解析器 | 目标格式 | 适用系统 |
+|:---|:---|:---|
+| `RubyDslParser` | Ruby DSL（Boxfile, podspec） | EasyBox, KSComponent, MTComponent |
+| `YamlConfigParser` | YAML 配置 | Melos, XcodeGen |
+| `SwiftDslParser` | Swift DSL（Project.swift） | Tuist |
+| `StarlarkParser` | Starlark（BUILD.bazel, BUCK） | Bazel, Buck2 |
+| `GradleDslParser` | Gradle Kotlin DSL | Gradle Convention Plugins |
+| `JsonConfigParser` | JSON 配置 | Nx, Flutter, React Native |
+| `CMakeParser` | CMakeLists.txt | CMake |
+
+解析器提取的是 `ParsedModuleSpec`——模块名、源文件路径、依赖列表——供 `ModuleDiscoverer` 后续消费。
+
+**用户自定义系统**：如果项目使用了自研构建系统，可以在 `boxspec.json` 的 `customDiscoverer` 字段声明系统配置文件、模块 Spec 模式和解析器类型——CustomConfigDiscoverer 会优先使用用户配置。
+
 发现模块后，`CouplingAnalyzer` 构建模块间的依赖图。图的边来自三种关系，权重不同：
 
 | 关系类型 | 权重 | 含义 |

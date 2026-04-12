@@ -373,6 +373,104 @@ export interface ServiceMap {
 
 这消除了传统 DI 容器的类型断言问题——`container.get('searchEngine')` 的返回类型在编译期就确定为 `SearchEngine`，IDE 自动补全和重构完全可用。新增服务时只需在 ServiceMap 中添加一行类型声明，TypeScript 编译器会自动检查所有使用点。
 
+### AiProviderManager — 统一 AI 管理器
+
+前文提到 ServiceContainer 的 `reloadAiProvider()` 可以热重载 AI Provider。实际上，热重载的完整实现由 `AiProviderManager` 承担——它是当前 AI Provider 的**唯一权威管理入口**，所有 Provider 读取和切换操作集中在此，消除了散落在各模块的 `name === 'mock'` 判断。
+
+```typescript
+// lib/external/ai/AiProviderManager.ts
+class AiProviderManager {
+  #provider: ManagedAiProvider;          // 当前主 Provider
+  #embedProvider: ManagedAiProvider | null;  // Embedding 备选
+  #tokenRecorder: TokenRecorder | null;      // Token 追踪器
+  #listeners: Set<SwitchListener>;           // 切换监听器
+
+  get isMock(): boolean;    // 是否 Mock 模式
+  get isReady(): boolean;   // 是否可用于 AI 操作
+  get info(): ProviderInfo; // 结构化信息快照
+  switchProvider(newProvider): SwitchResult;  // 热切换
+}
+```
+
+**热切换管线**（`switchProvider()`）是一个原子操作，6 步顺序执行：
+
+| 步骤 | 操作 | 说明 |
+|:---|:---|:---|
+| 1 | 替换核心引用 | `#provider = newProvider` |
+| 2 | Token AOP 重新挂载 | `_onTokenUsage` 回调绑定到新 Provider |
+| 3 | Embedding Fallback 重建 | 如果新 Provider 不支持 Embedding，尝试创建独立的 Embed Provider |
+| 4 | DI 数据管道同步 | 将新 Provider 引用写入 ServiceContainer 的 `singletons` |
+| 5 | DI 级联清除 | 清除所有标记 `aiDependent: true` 的 singleton 缓存 |
+| 6 | 监听器通知 | 回调所有 `SwitchListener`（Realtime 广播、SearchEngine 重建等） |
+
+步骤 2 的 Token AOP（Aspect-Oriented Programming）是一个精巧的设计：每个 AI Provider 实例有一个 `_onTokenUsage` 回调属性，在 `chat()` / `chatWithTools()` 执行后自动触发。Manager 在切换 Provider 时重新安装这个回调，指向当前的 `TokenRecorder`——调用者无需关心 Token 追踪的存在，它作为切面透明地附着在每次 AI 调用上。
+
+```typescript
+// AOP Token 追踪 — 透明挂载
+#wireTokenTracking(): void {
+  this.#provider._onTokenUsage = (usage) => {
+    this.#tokenRecorder?.record({
+      source: usage.source || 'provider',
+      provider: this.#provider.name,
+      model: this.#provider.model,
+      inputTokens: usage.inputTokens || 0,
+      outputTokens: usage.outputTokens || 0,
+    });
+  };
+}
+```
+
+**MockProvider** 不是简单的空操作——它实现了 9 种现实场景的模拟响应（scan、search、chat、structured output 等），让 Dashboard 和集成测试在没有 AI 密钥的环境下也能完整运行。用户在 Dashboard 切换到 Mock 模式后，所有 AI 依赖的服务（AgentFactory、SearchEngine 等）通过 DI 级联清除自动用 MockProvider 重建。
+
+**三层依赖注入绑定**避免了 AiProviderManager 与 ServiceContainer 之间的循环依赖：
+
+| 绑定 | 回调来源 | 用途 |
+|:---|:---|:---|
+| `_bindDependentClearer` | ServiceContainer | 切换时清除 AI 依赖 singleton |
+| `_bindEmbedFallbackInit` | AiModule | 初始化 Embedding 备选 Provider |
+| `_bindDiSync` | AiModule | 将 Provider 引用同步到 DI singletons |
+
+### Token Metering — 用量追踪
+
+AI API 调用是 AutoSnippet 运行中唯一有真实成本的操作。`TokenUsageStore` 追踪每次 AI 调用的 Token 消耗，提供 7 天维度的聚合分析。
+
+**数据模型**：
+
+```typescript
+// token_usage 表
+{
+  timestamp: number;       // 调用时间
+  source: string;          // 调用场景（bootstrap · chat · guard · search）
+  dimension: string;       // Bootstrap 维度（如 "networking"）
+  provider: string;        // AI 提供商（openai · google · anthropic）
+  model: string;           // 具体模型
+  inputTokens: number;
+  outputTokens: number;
+  totalTokens: number;
+  durationMs: number;
+  toolCalls: number;       // 工具调用次数
+  sessionId: string;
+}
+```
+
+**聚合查询**提供三种 7 天视图：
+
+| 查询 | 维度 | 用途 |
+|:---|:---|:---|
+| `getLast7DaysDaily()` | 按日期分组 | Dashboard Token 消耗趋势图 |
+| `getLast7DaysBySource()` | 按 source 分组 | 识别哪个场景消耗最多 Token |
+| `getLast7DaysSummary()` | 全局汇总 | 总消耗 + 平均每次调用消耗 |
+
+**容量治理**：`MAX_ROWS = 10000`，每次写入有 1% 概率触发裁剪（保留最新 10000 条按时间排序）。概率触发而非每次检查是为了摊销 DELETE 操作的开销——大部分写入零额外成本。
+
+**Developer Identity**（`developer-identity.ts`）标识 Token 消耗的归属人：
+
+```
+优先链：AUTOSNIPPET_USER 环境变量 → git config user.name → os.userInfo().username → 'unknown'
+```
+
+这个优先链确保在 CI 环境（ENV 优先）、本地开发（git 优先）和极端场景（OS fallback）下都能正确标识。结果在进程级别缓存——不会每次 AI 调用都 spawn `git config`。
+
 ### KnowledgeRepository——混合查询
 
 KnowledgeRepository 是仓储层的核心——知识条目的 CRUD 和复杂查询全部经过它。
