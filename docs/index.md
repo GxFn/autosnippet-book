@@ -31,4 +31,7 @@ features:
   - icon: 🚀
     title: Part VI · 平台与交付
     details: MCP 协议实现、六通道知识交付、Dashboard · CLI · 多端接入
+  - icon: 📊
+    title: Part VII · 真实数据
+    details: BiliDili 冷启动全记录——840 万 Token、14 维度、101 候选的真实执行数据与洞察
 ---

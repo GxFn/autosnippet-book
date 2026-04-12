@@ -87,6 +87,13 @@ export default defineConfig({
         ],
       },
       {
+        text: '真实数据',
+        collapsed: true,
+        items: [
+          { text: 'BiliDili 冷启动全记录', link: '/part7/ch19-bilidili-coldstart' },
+        ],
+      },
+      {
         text: '附录',
         collapsed: true,
         items: [
